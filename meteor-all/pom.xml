@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.sky.meteor</groupId>
+        <artifactId>meteor-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>meteor-all</artifactId>
+    <name>meteor-all</name>
+    <description>meteor all ${project.version}</description>
+    <url>https://github.com/xk11961677/framework</url>
+
+    <!--<dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>meteor-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+
+        </dependencies>
+    </dependencyManagement>-->
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>meteor-spring-boot</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

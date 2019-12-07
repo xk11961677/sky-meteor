@@ -1,0 +1,38 @@
+language: java
+sudo: false # faster builds
+
+jdk:
+#  - openjdk11
+  - openjdk8
+
+
+before_install:
+  - echo "Downloading Maven 3.5.0"
+    && wget https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.zip
+    && unzip -q apache-maven-3.5.0-bin.zip
+    && export M2_HOME=$PWD/apache-maven-3.5.0
+    && export PATH=$M2_HOME/bin:$PATH
+    && cp ./style/travis_settings.xml $HOME/.m2/settings.xml
+    && mvn -version
+
+#指定分支，只有指定的分支提交时才会运行脚本
+branches:
+  only:
+    - master
+    - develop
+
+
+cache:
+  directories:
+    - $HOME/.m2
+
+install: true
+
+script:
+  - travis_wait 30 mvn clean install -DskipTests=false -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+after_failure:
+  - echo "build failed!"

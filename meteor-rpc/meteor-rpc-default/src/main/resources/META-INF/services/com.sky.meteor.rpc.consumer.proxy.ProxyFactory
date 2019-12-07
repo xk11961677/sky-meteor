@@ -1,0 +1,3 @@
+com.sky.meteor.rpc.consumer.proxy.javassist.JavassistProxyFactory
+com.sky.meteor.rpc.consumer.proxy.jdk.JdkProxyFactory
+com.sky.meteor.rpc.consumer.proxy.bytebuddy.ByteBuddyProxyFactory

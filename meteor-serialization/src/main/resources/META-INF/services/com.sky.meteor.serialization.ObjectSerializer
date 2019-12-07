@@ -1,0 +1,5 @@
+com.sky.meteor.serialization.FastJsonSerializer
+com.sky.meteor.serialization.HessianSerializer
+com.sky.meteor.serialization.JavaSerializer
+com.sky.meteor.serialization.KryoSerializer
+com.sky.meteor.serialization.ProtostuffSerializer

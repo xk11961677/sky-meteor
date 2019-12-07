@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.sky.meteor</groupId>
+        <artifactId>meteor-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../</relativePath>
+    </parent>
+    <artifactId>meteor-bom</artifactId>
+    <packaging>pom</packaging>
+    <name>meteor-bom</name>
+    <description>RPC Bom ${project.version}</description>
+
+    <properties>
+        <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
+        <springfox.version>2.9.2</springfox.version>
+        <swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
+        <lombok.version>1.16.14</lombok.version>
+        <mybatis.version>3.4.2</mybatis.version>
+        <mybatis-starter-version>2.0.1</mybatis-starter-version>
+        <druid.version>1.1.16</druid.version>
+        <mysql.version>5.1.47</mysql.version>
+        <tk.mapper.version>4.1.5</tk.mapper.version>
+        <tk.mapper.starter.version>2.1.5</tk.mapper.starter.version>
+        <pagehelper.starter.version>1.2.10</pagehelper.starter.version>
+        <fastjson.version>1.2.60</fastjson.version>
+        <commons-codec.version>1.10</commons-codec.version>
+        <commons-lang.verion>2.6</commons-lang.verion>
+        <commons-lang3.version>3.5</commons-lang3.version>
+        <commons-pool2.version>2.6.2</commons-pool2.version>
+        <jackson-databind.version>2.9.10.1</jackson-databind.version>
+        <hibernate-validator.version>6.0.16.Final</hibernate-validator.version>
+        <httpclient.version>4.5.2</httpclient.version>
+        <okhttp3.version>3.8.1</okhttp3.version>
+        <redisson.starter.version>3.11.0</redisson.starter.version>
+        <kryo.version>2.24.0</kryo.version>
+        <hutool.version>4.5.18</hutool.version>
+        <aliyun-sdk-oss.version>3.5.0</aliyun-sdk-oss.version>
+        <mybatis.plus.starter.version>3.2.0</mybatis.plus.starter.version>
+    </properties>
+
+
+    <dependencyManagement>
+
+        <dependencies>
+            <!-- spring boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- the 3rd part -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun-sdk-oss.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp3.version}</version>
+            </dependency>
+
+            <!--lombok-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>swagger-bootstrap-ui</artifactId>
+                <version>${swagger-bootstrap-ui.version}</version>
+            </dependency>
+
+            <!--<dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>-->
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-starter-version}</version>
+            </dependency>
+
+            <!--<dependency>
+                <groupId>tk.mybatis</groupId>
+                <artifactId>mapper</artifactId>
+                <version>${tk.mapper.version}</version>
+            </dependency>-->
+
+            <!--tk-mybatis mapper-->
+            <dependency>
+                <groupId>tk.mybatis</groupId>
+                <artifactId>mapper-spring-boot-starter</artifactId>
+                <version>${tk.mapper.starter.version}</version>
+            </dependency>
+
+            <!--pagehelper-->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper.starter.version}</version>
+            </dependency>
+
+            <!--mybatis-plus mapper-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis.plus.starter.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.verion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons-pool2.version}</version>
+            </dependency>
+
+            <!-- druid starter -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- mysql connector -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+            </dependency>
+
+            <!-- redisson starter -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.starter.version}</version>
+            </dependency>
+
+
+            <!-- kryo serializer -->
+            <dependency>
+                <groupId>com.esotericsoftware.kryo</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${kryo.version}</version>
+            </dependency>
+
+            <!-- http://www.hutool.cn/ -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-core</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
