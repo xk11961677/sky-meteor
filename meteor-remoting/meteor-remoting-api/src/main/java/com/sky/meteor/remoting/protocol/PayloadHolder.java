@@ -30,20 +30,19 @@ import lombok.Setter;
  */
 public abstract class PayloadHolder {
 
-
+    /**
+     * 序列化类型
+     */
     @Getter
     @Setter
     private byte serializerCode;
 
+    /**
+     * 二进制消息
+     */
+    @Getter
+    @Setter
     private byte[] bytes = new byte[0];
-
-    public byte[] bytes() {
-        return bytes;
-    }
-
-    public void bytes(byte[] bytes) {
-        this.bytes = bytes;
-    }
 
     public void bytes(byte serializerCode, byte[] bytes) {
         this.bytes = bytes;

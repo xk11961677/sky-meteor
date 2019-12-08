@@ -22,6 +22,8 @@
  */
 package com.sky.meteor.remoting;
 
+import lombok.Getter;
+
 /**
  * 远程访问错误信息枚举
  *
@@ -58,33 +60,28 @@ public enum Status {
     // 客户端反序列化错误
     DESERIALIZATION_FAIL((byte) 0x60, "DESERIALIZATION_FAIL");
 
-    Status(byte value, String description) {
+    Status(byte key, String value) {
+        this.key = key;
         this.value = value;
-        this.description = description;
     }
 
-    private byte value;
-    private String description;
+    @Getter
+    private byte key;
 
-    public static Status parse(byte value) {
+    @Getter
+    private String value;
+
+    public static Status parse(byte key) {
         for (Status s : values()) {
-            if (s.value == value) {
+            if (s.key == key) {
                 return s;
             }
         }
         return null;
     }
 
-    public byte value() {
-        return value;
-    }
-
-    public String description() {
-        return description;
-    }
-
     @Override
     public String toString() {
-        return description();
+        return getValue();
     }
 }

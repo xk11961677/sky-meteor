@@ -31,10 +31,17 @@ import lombok.Data;
 @Data
 public class Request extends PayloadHolder {
 
+    /**
+     * 时间戳
+     */
     private long timestamp;
-
+    /**
+     * 版本
+     */
     private String version;
-
+    /**
+     * 消息id
+     */
     private Long id;
 
     public Request() {
@@ -44,8 +51,4 @@ public class Request extends PayloadHolder {
         this.id = id;
     }
 
-
-    public void timestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
 }

@@ -20,22 +20,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.protocol;
+package com.sky.meteor.spring;
 
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author
  */
-public class LongSequenceUtils {
 
-    private static final LongSequence longSequence = new LongSequence();
+@Configuration
+@ConfigurationProperties(prefix = "meteor")
+@Data
+public class MeteorProperties {
 
-    /**
-     * 获取id
-     *
-     * @return
-     */
-    public static long getId() {
-        return longSequence.next();
-    }
+    private String port;
+
+    private String timeout;
+
+    private RegistryProperties registry = new RegistryProperties();
 }

@@ -37,21 +37,20 @@ import java.util.List;
  */
 @Slf4j
 public class ProtocolDecoder extends ReplayingDecoder<ProtocolDecoder.State> {
-
     /**
      * 消息内容最大长度
      */
     private static final int MAX_BODY_SIZE = 1024 * 1024 * 5;
+    /**
+     * 协议头
+     */
+    private final ProtocolHeader header = new ProtocolHeader();
 
 
     public ProtocolDecoder() {
         super(State.MAGIC);
     }
 
-    /**
-     * 协议头
-     */
-    private final ProtocolHeader header = new ProtocolHeader();
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
@@ -80,26 +79,24 @@ public class ProtocolDecoder extends ReplayingDecoder<ProtocolDecoder.State> {
                 // 消息体内容
                 switch (header.getMessageCode()) {
                     case ProtocolHeader.HEARTBEAT:
-                        //log.info("the protocol decoder recv heartbeat");
                         break;
                     case ProtocolHeader.REQUEST: {
-                        //log.info("the protocol decoder recv REQUEST");
                         int length = checkBodySize(header.getBodySize());
                         byte[] bytes = new byte[length];
                         in.readBytes(bytes);
                         Request request = new Request(header.getId());
-                        request.timestamp(System.currentTimeMillis());
+                        request.setTimestamp(System.currentTimeMillis());
                         request.bytes(header.getSerializerCode(), bytes);
                         out.add(request);
                         break;
                     }
                     case ProtocolHeader.RESPONSE: {
-                        //log.info("the protocol decoder recv RESPONSE");
                         int length = checkBodySize(header.getBodySize());
                         byte[] bytes = new byte[length];
                         in.readBytes(bytes);
                         Response response = new Response(header.getId());
-                        response.status(header.getStatus());
+                        response.setStatus(header.getStatus());
+                        response.setTimestamp(System.currentTimeMillis());
                         response.bytes(header.getSerializerCode(), bytes);
                         out.add(response);
                         break;

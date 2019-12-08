@@ -30,26 +30,28 @@ import lombok.Data;
  */
 @Data
 public class Response extends PayloadHolder {
-
+    /**
+     * 时间戳
+     */
     private long timestamp;
-
+    /**
+     * 版本
+     */
     private String version;
-
+    /**
+     * 响应状态码
+     */
     private byte status;
+    /**
+     * 用于映射 <id, request, response> 三元组
+     * 消息id 与 request id一致
+     */
+    private long id;
 
-    // 用于映射 <id, request, response> 三元组
-    private final long id; // request.invokeId
-
-    public byte status() {
-        return status;
+    public Response() {
     }
 
-    public long id() {
-        return id;
+    public Response(long id) {
+        this.id = id;
     }
-
-    public void status(byte status) {
-        this.status = status;
-    }
-
 }

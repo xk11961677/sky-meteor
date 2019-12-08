@@ -93,8 +93,8 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
 
 
     @Override
-    public void startup() {
-        super.startup();
+    public void start() {
+        super.start();
         try {
             this.init();
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
@@ -167,7 +167,6 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
                             p.addLast(new ServerHeartbeatChannelHandler());
                             p.addLast("protocolEncoder", new ProtocolEncoder());
                             p.addLast("protocolDecoder", new ProtocolDecoder());
-//                            p.addLast("loggingHandler", loggingHandler);
                             p.addLast("flushEnhance", new FlushConsolidationHandler(5, true));
                             p.addLast("serverChannelHandler", serverChannelHandler);
                         }

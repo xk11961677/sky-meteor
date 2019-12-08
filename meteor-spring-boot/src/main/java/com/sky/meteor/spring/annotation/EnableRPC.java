@@ -28,7 +28,7 @@ import com.sky.meteor.common.enums.LoadBalanceEnum;
 import com.sky.meteor.common.enums.ProxyEnum;
 import com.sky.meteor.common.enums.SerializeEnum;
 import com.sky.meteor.spring.AnnotationRegistrar;
-import com.sky.meteor.spring.RpcAutoConfiguration;
+import com.sky.meteor.spring.MeteorAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -39,7 +39,7 @@ import java.lang.annotation.*;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import({RpcAutoConfiguration.class, AnnotationRegistrar.class})
+@Import({MeteorAutoConfiguration.class, AnnotationRegistrar.class})
 @Documented
 public @interface EnableRPC {
 

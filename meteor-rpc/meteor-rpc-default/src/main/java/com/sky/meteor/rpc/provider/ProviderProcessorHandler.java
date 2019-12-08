@@ -59,12 +59,12 @@ public class ProviderProcessorHandler extends AbstractProcessor {
             @Override
             public Object call() throws Exception {
                 Response response = new Response(request.getId());
-                response.setStatus(Status.OK.value());
+                response.setStatus(Status.OK.getKey());
                 response.setSerializerCode(request.getSerializerCode());
                 try {
                     ObjectSerializer serializer = SerializerHolder.getInstance().getSerializer(request.getSerializerCode());
 
-                    byte[] bytes = request.bytes();
+                    byte[] bytes = request.getBytes();
                     RpcInvocation rpcInvocation = serializer.deSerialize(bytes, RpcInvocation.class);
 
                     Object result = ReflectAsmUtils.invoke(rpcInvocation.getClazzName(),
@@ -72,10 +72,10 @@ public class ProviderProcessorHandler extends AbstractProcessor {
                             rpcInvocation.getParameterTypes(), rpcInvocation.getArguments());
 
                     byte[] body = serializer.serialize(result);
-                    response.bytes(body);
+                    response.setBytes(body);
 
                 } catch (Exception e) {
-                    response.setStatus(Status.SERVER_ERROR.value());
+                    response.setStatus(Status.SERVER_ERROR.getKey());
                     log.error("the server exception :{}", e);
                 } finally {
                     Channel channel = ctx.channel();

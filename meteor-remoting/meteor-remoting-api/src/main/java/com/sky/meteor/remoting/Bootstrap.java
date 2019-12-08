@@ -30,7 +30,7 @@ public interface Bootstrap {
     /**
      * 启动
      */
-    void startup();
+    void start();
 
     /**
      * 停止

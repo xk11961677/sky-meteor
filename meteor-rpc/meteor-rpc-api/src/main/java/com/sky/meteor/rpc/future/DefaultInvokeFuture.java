@@ -22,10 +22,10 @@
  */
 package com.sky.meteor.rpc.future;
 
+import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.Status;
 import com.sky.meteor.serialization.SerializerHolder;
-import com.sky.meteor.common.exception.RpcException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
@@ -74,7 +74,7 @@ public class DefaultInvokeFuture<V> extends CompletableFuture<V> implements Invo
             return get(timeout, TimeUnit.NANOSECONDS);
         } catch (TimeoutException e) {
             Response response = new Response(invokeId);
-            response.setStatus(Status.CLIENT_TIMEOUT.value());
+            response.setStatus(Status.CLIENT_TIMEOUT.getKey());
             DefaultInvokeFuture.fakeReceived(response);
         }
         return null;
@@ -84,9 +84,9 @@ public class DefaultInvokeFuture<V> extends CompletableFuture<V> implements Invo
      * @param response
      */
     private void doReceived(Response response) {
-        byte status = response.status();
-        if (status == Status.OK.value()) {
-            byte[] bytes = response.bytes();
+        byte status = response.getStatus();
+        if (status == Status.OK.getKey()) {
+            byte[] bytes = response.getBytes();
             byte serializerCode = response.getSerializerCode();
             V v = SerializerHolder.getInstance().getSerializer(serializerCode).deSerialize(bytes, returnType);
             complete(v);
@@ -102,7 +102,7 @@ public class DefaultInvokeFuture<V> extends CompletableFuture<V> implements Invo
      */
     private void setException(byte statusKey) {
         Status status = Status.parse(statusKey);
-        Throwable cause = new RpcException(status.value(), status.description());
+        Throwable cause = new RpcException(status.getKey(), status.getValue());
         setCause(cause);
         completeExceptionally(cause);
     }
@@ -111,7 +111,7 @@ public class DefaultInvokeFuture<V> extends CompletableFuture<V> implements Invo
      * @param response
      */
     public static void received(Response response) {
-        long invokeId = response.id();
+        long invokeId = response.getId();
         DefaultInvokeFuture<?> future = roundFutures.remove(invokeId);
         future.doReceived(response);
     }
@@ -120,7 +120,7 @@ public class DefaultInvokeFuture<V> extends CompletableFuture<V> implements Invo
      * @param response
      */
     public static void fakeReceived(Response response) {
-        long invokeId = response.id();
+        long invokeId = response.getId();
         DefaultInvokeFuture<?> future = roundFutures.remove(invokeId);
         future.doReceived(response);
     }

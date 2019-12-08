@@ -29,7 +29,7 @@ import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.Status;
 import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPool;
 import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
-import com.sky.meteor.remoting.protocol.LongSequenceUtils;
+import com.sky.meteor.remoting.protocol.LongSequenceHelper;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 import com.sky.meteor.common.exception.RpcException;
@@ -57,7 +57,7 @@ public class InvokerDispatcher implements Dispatcher {
             invokeFuture = $invoke(channel, request, returnType);
         } catch (Exception e) {
             log.error("dispatcher exception:{}", e);
-            throw new RpcException(Status.CLIENT_ERROR.value(), Status.CLIENT_ERROR.description(), e);
+            throw new RpcException(Status.CLIENT_ERROR.getKey(), Status.CLIENT_ERROR.getValue(), e);
         } finally {
             channelGenericPool.releaseConnection(channel);
         }
@@ -73,7 +73,7 @@ public class InvokerDispatcher implements Dispatcher {
      */
     private DefaultInvokeFuture $invoke(Channel channel, Request request, Class<?> returnType) throws Exception {
         DefaultInvokeFuture<?> invokeFuture = null;
-        long id = LongSequenceUtils.getId();
+        long id = LongSequenceHelper.getId();
         try {
             request.setId(id);
             invokeFuture = DefaultInvokeFuture.with(id, 0, returnType);
@@ -81,7 +81,7 @@ public class InvokerDispatcher implements Dispatcher {
         } catch (Exception e) {
             log.error("the client proxy invoke failed:{}", e.getMessage());
             Response response = new Response(id);
-            response.setStatus(Status.CLIENT_ERROR.value());
+            response.setStatus(Status.CLIENT_ERROR.getKey());
             DefaultInvokeFuture.fakeReceived(response);
         }
         return invokeFuture;

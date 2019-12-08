@@ -73,8 +73,8 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
     }
 
     @Override
-    public void startup() {
-        super.startup();
+    public void start() {
+        super.start();
         this.init();
     }
 

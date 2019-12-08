@@ -29,6 +29,7 @@
 
 开源地址
 ---
+* https://github.com/xk11961677/sky-meteor
 
 版本说明
 ---

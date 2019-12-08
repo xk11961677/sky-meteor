@@ -81,7 +81,7 @@ public class BenchmarkApplication {
         nettyClient = new NettyClient();
         nettyClient.connectToRegistryServer(register);
         nettyClient.setProcessor(processor);
-        nettyClient.startup();
+        nettyClient.start();
 
         reference = new Reference() {
             @Override

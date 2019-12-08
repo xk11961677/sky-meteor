@@ -46,12 +46,12 @@ import java.util.Objects;
  * @author
  */
 @Configuration
-@ComponentScan(basePackageClasses = RpcAutoConfiguration.class)
+@ComponentScan(basePackageClasses = MeteorAutoConfiguration.class)
 @Slf4j
-public class RpcAutoConfiguration implements CommandLineRunner {
+public class MeteorAutoConfiguration implements CommandLineRunner {
 
     @Autowired
-    private RpcProperties properties;
+    private MeteorProperties properties;
 
     @Override
     public void run(String... args) {
@@ -95,9 +95,9 @@ public class RpcAutoConfiguration implements CommandLineRunner {
      */
     private class Server implements Runnable {
 
-        private RpcProperties properties;
+        private MeteorProperties properties;
 
-        private Server(RpcProperties properties) {
+        private Server(MeteorProperties properties) {
             this.properties = properties;
         }
 
@@ -124,7 +124,7 @@ public class RpcAutoConfiguration implements CommandLineRunner {
                 }
             });
             thread.start();
-            nettyServer.startup();
+            nettyServer.start();
             log.info("the rpc server startup successfully !");
         }
     }
@@ -132,9 +132,9 @@ public class RpcAutoConfiguration implements CommandLineRunner {
 
     private class Client implements Runnable {
 
-        private RpcProperties properties;
+        private MeteorProperties properties;
 
-        private Client(RpcProperties properties) {
+        private Client(MeteorProperties properties) {
             this.properties = properties;
         }
 
@@ -149,7 +149,7 @@ public class RpcAutoConfiguration implements CommandLineRunner {
             NettyClient nettyClient = new NettyClient();
             nettyClient.connectToRegistryServer(register);
             nettyClient.setProcessor(processor);
-            nettyClient.startup();
+            nettyClient.start();
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> nettyClient.stop()));
 
