@@ -7,7 +7,7 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
     <description>RPC</description>
-    <url>https://github.com/xk11961677/framework</url>
+    <url>https://github.com/xk11961677/sky-meteor</url>
 
     <licenses>
         <license>
@@ -17,9 +17,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/xk11961677/framework.git</connection>
-        <developerConnection>scm:git:https://github.com/xk11961677/framework.git</developerConnection>
-        <url>https://github.com/xk11961677/framework</url>
+        <connection>scm:git:https://github.com/xk11961677/sky-meteor.git</connection>
+        <developerConnection>scm:git:https://github.com/xk11961677/sky-meteor.git</developerConnection>
+        <url>https://github.com/xk11961677/sky-meteor</url>
         <tag>head</tag>
     </scm>
 
@@ -32,12 +32,12 @@
     </developers>
 
     <issueManagement>
-        <url>https://github.com/xk11961677/framework/issues</url>
+        <url>https://github.com/xk11961677/sky-meteor/issues</url>
     </issueManagement>
 
     <properties>
         <!-- all version -->
-        <revision>1.0.0-SNAPSHOT</revision>
+        <revision>0.1.0-SNAPSHOT</revision>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>

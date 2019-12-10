@@ -1,12 +1,12 @@
 ## Meteor
 
-[![Build Status](https://travis-ci.org/xk11961677/framework.svg?branch=master)](https://travis-ci.org/xk11961677/framework)
+[![Build Status](https://travis-ci.org/xk11961677/sky-meteor.svg?branch=master)](https://travis-ci.org/xk11961677/sky-meteor)
 [![license](https://img.shields.io/badge/license-mit-ff69b4.svg)](https://mit-license.org/license.html)
 [![springboot](https://img.shields.io/badge/springboot-2.1.4.RELEASE-orange.svg)](https://spring.io/projects/spring-boot)
 ![gitter](https://img.shields.io/gitter/room/sky-docs/community)
 ![version](https://img.shields.io/badge/version-0.1.0-blueviolet.svg)
 ![helloworld](https://img.shields.io/badge/hello-world-blue)
-[![codecov](https://codecov.io/gh/xk11961677/framework/branch/master/graph/badge.svg)](https://codecov.io/gh/xk11961677/framework)
+[![codecov](https://codecov.io/gh/xk11961677/sky-meteor/branch/master/graph/badge.svg)](https://codecov.io/gh/xk11961677/sky-meteor)
 
 远程调用框架
 ===
