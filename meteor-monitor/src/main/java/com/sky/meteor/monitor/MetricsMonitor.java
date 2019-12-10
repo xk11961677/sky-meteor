@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MetricsMonitor {
 
-    private static final String MONITOR_NAME = "sky-framework-rpc-monitor";
+    private static final String MONITOR_NAME = "meteor-monitor";
 
     @Getter
     private static AtomicInteger serverChannelCount = new AtomicInteger();

@@ -30,7 +30,7 @@ import java.util.concurrent.FutureTask;
  *
  * @author
  */
-public class CommonFutureTask<V> extends FutureTask<V> {
+public class ExtendFutureTask<V> extends FutureTask<V> {
 
     private IAsynchronousHandler r;
 
@@ -40,7 +40,7 @@ public class CommonFutureTask<V> extends FutureTask<V> {
      * @param callable
      * @since
      */
-    public CommonFutureTask(Callable<V> callable) {
+    public ExtendFutureTask(Callable<V> callable) {
         super(callable);
         if (callable instanceof IAsynchronousHandler) {
             this.r = (IAsynchronousHandler) callable;
@@ -54,7 +54,7 @@ public class CommonFutureTask<V> extends FutureTask<V> {
      * @param result
      * @since
      */
-    public CommonFutureTask(Runnable runnable, V result) {
+    public ExtendFutureTask(Runnable runnable, V result) {
         super(runnable, result);
     }
 

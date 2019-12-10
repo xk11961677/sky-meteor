@@ -23,6 +23,8 @@
 package com.sky.meteor.remoting.netty.server;
 
 
+import com.sky.meteor.common.spi.SpiLoader;
+import com.sky.meteor.common.threadpool.ThreadPoolHelper;
 import com.sky.meteor.registry.Register;
 import com.sky.meteor.registry.Registry;
 import com.sky.meteor.registry.RegistryService;
@@ -31,8 +33,6 @@ import com.sky.meteor.remoting.netty.protocol.ProtocolDecoder;
 import com.sky.meteor.remoting.netty.protocol.ProtocolEncoder;
 import com.sky.meteor.rpc.InternalHandler;
 import com.sky.meteor.rpc.Processor;
-import com.sky.meteor.common.spi.SpiLoader;
-import com.sky.meteor.common.threadpool.CommonThreadPool;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -114,10 +114,7 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
         if (status()) {
             super.stop();
             try {
-                boolean flag = CommonThreadPool.shutDown();
-                if (!flag) {
-                    CommonThreadPool.getThreadPool().shutdownNow();
-                }
+                ThreadPoolHelper.shutdown();
             } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }

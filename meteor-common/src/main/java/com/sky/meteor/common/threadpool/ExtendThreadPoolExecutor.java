@@ -30,14 +30,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author
  */
-public class ThreadPoolExecutorExtend extends ThreadPoolExecutor {
+public class ExtendThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * 需要处理的任务数
      */
     final AtomicInteger submittedTasksCount = new AtomicInteger();
 
-    ThreadPoolExecutorExtend(int corePoolSize, int maximumPoolSize,
+    ExtendThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
                              long keepAliveTime, TimeUnit unit,
                              BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory,
                              RejectedExecutionHandler handler) {
@@ -66,8 +66,8 @@ public class ThreadPoolExecutorExtend extends ThreadPoolExecutor {
     protected void afterExecute(Runnable r, Throwable t) {
         //执行完毕减1
         submittedTasksCount.decrementAndGet();
-        if (r instanceof CommonFutureTask) {
-            IAsynchronousHandler handler = ((CommonFutureTask) r).getR();
+        if (r instanceof ExtendFutureTask) {
+            IAsynchronousHandler handler = ((ExtendFutureTask) r).getR();
             if (handler == null) {
                 throw new NullPointerException("线程池参数对象为null!");
             }
@@ -78,8 +78,8 @@ public class ThreadPoolExecutorExtend extends ThreadPoolExecutor {
     @SuppressWarnings("rawtypes")
     @Override
     protected void beforeExecute(Thread t, Runnable r) {
-        if (r instanceof CommonFutureTask) {
-            IAsynchronousHandler handler = ((CommonFutureTask) r).getR();
+        if (r instanceof ExtendFutureTask) {
+            IAsynchronousHandler handler = ((ExtendFutureTask) r).getR();
             if (handler == null) {
                 throw new NullPointerException("线程池参数对象为null!");
             }
@@ -89,6 +89,6 @@ public class ThreadPoolExecutorExtend extends ThreadPoolExecutor {
 
     @Override
     protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-        return new CommonFutureTask<T>(callable);
+        return new ExtendFutureTask<T>(callable);
     }
 }

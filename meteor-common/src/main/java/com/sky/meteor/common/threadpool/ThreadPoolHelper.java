@@ -37,15 +37,43 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author
  */
 @Slf4j
-public final class CommonThreadPool {
+public final class ThreadPoolHelper {
 
-    public static final String LONG_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-    private static ExecutorService executorService;
+    private static final String LONG_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private static final long EXECUTE_TIME = 10000L;
 
-    private CommonThreadPool() {
+    private static ExecutorService extendExecutorService;
+
+    private ThreadPoolHelper() {
+    }
+
+    /**
+     * 获取线程池对象
+     *
+     * @param threadPoolProperties
+     * @since
+     */
+    public static ExtendThreadPoolExecutor newExtendThreadPool(ThreadPoolProperties threadPoolProperties) {
+        int corePoolSize = threadPoolProperties.getCorePoolSize();
+        int maximumPoolSize = threadPoolProperties.getMaximumPoolSize();
+        int initialCapacity = threadPoolProperties.getInitialCapacity();
+        long keepAliveTime = threadPoolProperties.getKeepAliveTime();
+        String threadName = threadPoolProperties.getThreadName();
+        boolean discard = threadPoolProperties.isDiscard();
+
+        /**
+         * 增加构造队列容量参数
+         */
+        TaskQueue taskqueue = new TaskQueue(initialCapacity, discard);
+        ExtendThreadPoolExecutor executeNew = new ExtendThreadPoolExecutor(corePoolSize, maximumPoolSize,
+                keepAliveTime, TimeUnit.SECONDS,
+                taskqueue, new TaskThreadFactory(threadName),
+                new ThreadPoolRejectedExecutionHandler(discard));
+
+        taskqueue.setParent(executeNew);
+        extendExecutorService = executeNew;
+        return executeNew;
     }
 
     /**
@@ -57,74 +85,21 @@ public final class CommonThreadPool {
      */
     public static Future<Object> execute(IAsynchronousHandler command) {
         ThreadPoolAdaptor handler = new ThreadPoolAdaptor(command, EXECUTE_TIME);
-        Future<Object> future = executorService.submit(handler);
+        Future<Object> future = extendExecutorService.submit(handler);
         return future;
-    }
-
-
-    /**
-     * 异步执行公共执行方法
-     *
-     * @param command
-     * @return future, 返回异步等待对象
-     * @since
-     */
-    public static Future<Object> execute(DefaultAsynchronousHandler command) {
-        return execute((IAsynchronousHandler) command);
-
     }
 
     /**
      * 关闭线程池
      *
      * @return boolean
-     * @since
      */
-    @SuppressWarnings("unused")
-    public static boolean shutDown() {
-        if (executorService != null) {
-            executorService.shutdown();
+    public static boolean shutdown() {
+        if (extendExecutorService != null) {
+            extendExecutorService.shutdown();
             return true;
         }
         return false;
-    }
-
-    /**
-     * 获取线程池对象
-     *
-     * @param vo
-     * @since
-     */
-    public static ThreadPoolExecutorExtend initThreadPool(ThreadPoolProperties vo) {
-        int corePoolSize = vo.getCorePoolSize();
-        int maximumPoolSize = vo.getMaximumPoolSize();
-        int initialCapacity = vo.getInitialCapacity();
-        long keepAliveTime = vo.getKeepAliveTime();
-        String threadName = vo.getThreadName();
-
-
-        /**
-         * 增加构造队列容量参数
-         */
-        TaskQueue taskqueue = new TaskQueue(initialCapacity, vo.isDiscard());
-        ThreadPoolExecutorExtend executeNew = new ThreadPoolExecutorExtend(corePoolSize, maximumPoolSize,
-                keepAliveTime, TimeUnit.SECONDS,
-                taskqueue, new TaskThreadFactory(threadName), new ThreadPlloRejectedExecutionHandler(vo.isDiscard()));
-
-        taskqueue.setParent(executeNew);
-
-        executorService = executeNew;
-        return executeNew;
-    }
-
-    /**
-     * 获取线程池
-     *
-     * @return
-     */
-    @SuppressWarnings("unused")
-    public static ThreadPoolExecutorExtend getThreadPool() {
-        return (ThreadPoolExecutorExtend) executorService;
     }
 
     /**
@@ -132,14 +107,10 @@ public final class CommonThreadPool {
      *
      * @return
      */
-    public static boolean isMemoryThreshold() {
-
+    private static boolean isMemoryThreshold() {
         long size = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
         long thresholdSize = (long) (ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax() * 0.7);
-        if (size > thresholdSize) {
-            return true;
-        }
-        return false;
+        return size > thresholdSize ? true : false;
     }
 
     /**
@@ -174,12 +145,10 @@ public final class CommonThreadPool {
      * 由优先使用队列转变为优先使用最大线程值
      */
     static class TaskQueue extends LinkedBlockingQueue<Runnable> {
-        /**
-         *
-         */
+
         private static final long serialVersionUID = -3966913824895982184L;
 
-        ThreadPoolExecutorExtend parent = null;
+        ExtendThreadPoolExecutor parent = null;
 
         boolean isDiscard = true;
 
@@ -200,7 +169,7 @@ public final class CommonThreadPool {
             super(c);
         }
 
-        public void setParent(ThreadPoolExecutorExtend tp) {
+        public void setParent(ExtendThreadPoolExecutor tp) {
             parent = tp;
         }
 
@@ -218,7 +187,6 @@ public final class CommonThreadPool {
             if (parent == null) {
                 return super.offer(o);
             }
-
             //内存限制
             if (this.isDiscard && isMemoryThreshold()) {
                 return false;
@@ -250,18 +218,17 @@ public final class CommonThreadPool {
      * 队列达到上限则打印详细日志
      * 轻量级管理线程池数量
      */
-    static class ThreadPlloRejectedExecutionHandler implements RejectedExecutionHandler {
+    static class ThreadPoolRejectedExecutionHandler implements RejectedExecutionHandler {
 
         boolean isDiscard = true;
 
-        public ThreadPlloRejectedExecutionHandler() {
+        public ThreadPoolRejectedExecutionHandler() {
         }
 
-        public ThreadPlloRejectedExecutionHandler(boolean isDiscard) {
+        public ThreadPoolRejectedExecutionHandler(boolean isDiscard) {
             this.isDiscard = isDiscard;
         }
 
-        @SuppressWarnings("rawtypes")
         @Override
         public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
             /**
@@ -281,15 +248,12 @@ public final class CommonThreadPool {
                 }
             }
 
-
-            if (r instanceof CommonFutureTask) {
-                IAsynchronousHandler handlerAdaptor = ((CommonFutureTask) r).getR();
+            if (r instanceof ExtendFutureTask) {
+                IAsynchronousHandler handlerAdaptor = ((ExtendFutureTask) r).getR();
                 if (handlerAdaptor == null) {
                     log.error("CommonThreadPool 以达到队列容量上限：" + r.toString());
                     throw new RejectedExecutionException();
                 }
-
-
                 //获取真实的handler ，记录日志
                 IAsynchronousHandler handler = null;
                 if (handlerAdaptor instanceof ThreadPoolAdaptor) {
@@ -301,15 +265,14 @@ public final class CommonThreadPool {
                     handler = handlerAdaptor;
                 }
                 StringBuilder sb = new StringBuilder();
-
                 sb.append("任务名称:").append(handler.getClass());
-                sb.append("。happenTime=").append(formateDate());
+                sb.append("。happenTime=").append(formatDate());
                 sb.append("。toString=").append(handler.toString());
                 log.error("CommonThreadPool 以达到队列容量上限：" + sb.toString());
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("任务名称:").append(r.getClass());
-                sb.append("。happenTime=").append(formateDate());
+                sb.append("。happenTime=").append(formatDate());
                 sb.append("。toString=").append(r.toString());
                 log.error("CommonThreadPool 以达到队列容量上限：" + sb.toString());
             }
@@ -317,13 +280,13 @@ public final class CommonThreadPool {
             /**
              * 自定义线程池，执行数量管理递减
              */
-            if (executor instanceof ThreadPoolExecutorExtend) {
-                ((ThreadPoolExecutorExtend) executor).getSubmittedTasksCount().decrementAndGet();
+            if (executor instanceof ExtendThreadPoolExecutor) {
+                ((ExtendThreadPoolExecutor) executor).getSubmittedTasksCount().decrementAndGet();
             }
             throw new RejectedExecutionException();
         }
 
-        private String formateDate() {
+        private String formatDate() {
             Date date = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat(LONG_FORMAT);
             String result = sdf.format(date);

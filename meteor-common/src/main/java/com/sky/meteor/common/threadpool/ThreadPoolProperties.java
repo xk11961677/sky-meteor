@@ -26,9 +26,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 线程池参数vo
+ * 线程池参数
  *
- * @author sky
+ * @author
  */
 public class ThreadPoolProperties {
     /**
@@ -47,13 +47,6 @@ public class ThreadPoolProperties {
      * 默认线程不被使用后存活时间
      */
     private static final int KEEP_ALIVE_TIME = 120;
-
-    /**
-     * 是否开启
-     */
-    @Getter
-    @Setter
-    private boolean enabled = true;
     /**
      * 核心线程数
      */
@@ -83,9 +76,9 @@ public class ThreadPoolProperties {
      */
     @Getter
     @Setter
-    private String threadName = "sky-meteor-threadpool-";
+    private String threadName = "meteor-threadpool-";
     /**
-     * 内存大小检测
+     * 内存大小检测 false:不检测 true:检测
      */
     @Getter
     @Setter

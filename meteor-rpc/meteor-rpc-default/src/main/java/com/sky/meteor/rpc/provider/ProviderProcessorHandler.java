@@ -23,6 +23,10 @@
 package com.sky.meteor.rpc.provider;
 
 
+import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
+import com.sky.meteor.common.threadpool.ThreadPoolHelper;
+import com.sky.meteor.common.threadpool.ThreadPoolProperties;
+import com.sky.meteor.common.util.ReflectAsmUtils;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.Status;
@@ -30,10 +34,6 @@ import com.sky.meteor.rpc.AbstractProcessor;
 import com.sky.meteor.rpc.RpcInvocation;
 import com.sky.meteor.serialization.ObjectSerializer;
 import com.sky.meteor.serialization.SerializerHolder;
-import com.sky.meteor.common.threadpool.CommonThreadPool;
-import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
-import com.sky.meteor.common.threadpool.ThreadPoolProperties;
-import com.sky.meteor.common.util.ReflectAsmUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -48,13 +48,12 @@ import lombok.extern.slf4j.Slf4j;
 public class ProviderProcessorHandler extends AbstractProcessor {
 
     public ProviderProcessorHandler() {
-        ThreadPoolProperties properties = new ThreadPoolProperties();
-        CommonThreadPool.initThreadPool(properties);
+        ThreadPoolHelper.newExtendThreadPool(new ThreadPoolProperties());
     }
 
     @Override
     public void handler(ChannelHandlerContext ctx, Request request) {
-        CommonThreadPool.execute(new DefaultAsynchronousHandler() {
+        ThreadPoolHelper.execute(new DefaultAsynchronousHandler() {
 
             @Override
             public Object call() throws Exception {

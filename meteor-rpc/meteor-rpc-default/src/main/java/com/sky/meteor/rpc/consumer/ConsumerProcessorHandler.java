@@ -22,12 +22,12 @@
  */
 package com.sky.meteor.rpc.consumer;
 
+import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
+import com.sky.meteor.common.threadpool.ThreadPoolHelper;
+import com.sky.meteor.common.threadpool.ThreadPoolProperties;
 import com.sky.meteor.remoting.Response;
 import com.sky.meteor.rpc.AbstractProcessor;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
-import com.sky.meteor.common.threadpool.CommonThreadPool;
-import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
-import com.sky.meteor.common.threadpool.ThreadPoolProperties;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -38,13 +38,12 @@ import io.netty.channel.ChannelHandlerContext;
 public class ConsumerProcessorHandler extends AbstractProcessor {
 
     public ConsumerProcessorHandler() {
-        ThreadPoolProperties properties = new ThreadPoolProperties();
-        CommonThreadPool.initThreadPool(properties);
+        ThreadPoolHelper.newExtendThreadPool(new ThreadPoolProperties());
     }
 
     @Override
     public void handler(ChannelHandlerContext ctx, Response response) {
-        CommonThreadPool.execute(new DefaultAsynchronousHandler() {
+        ThreadPoolHelper.execute(new DefaultAsynchronousHandler() {
             @Override
             public Object call() throws Exception {
                 DefaultInvokeFuture.received(response);
