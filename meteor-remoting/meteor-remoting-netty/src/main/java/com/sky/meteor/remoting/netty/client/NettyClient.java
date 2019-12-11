@@ -23,7 +23,7 @@
 package com.sky.meteor.remoting.netty.client;
 
 
-import com.sky.meteor.common.spi.SpiLoader;
+import com.sky.meteor.common.spi.SpiExtensionHolder;
 import com.sky.meteor.common.threadpool.ThreadPoolHelper;
 import com.sky.meteor.registry.Register;
 import com.sky.meteor.registry.Registry;
@@ -133,7 +133,8 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
 
     @Override
     public void connectToRegistryServer(Register register) {
-        registryService = SpiLoader.loadByName(RegistryService.class, register.getName());
+        SpiExtensionHolder.getInstance().loadSpiExtension(RegistryService.class, register.getName());
+        registryService = SpiExtensionHolder.getInstance().get(RegistryService.class);
         registryService.addNotifyListener(new PoolNotifyListener());
         registryService.connectToRegistryServer(register);
     }
