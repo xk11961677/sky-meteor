@@ -80,7 +80,7 @@ public class ProviderProcessorHandler extends AbstractProcessor {
                     Channel channel = ctx.channel();
                     if (channel.isActive() && channel.isWritable()) {
                         channel.writeAndFlush(response).addListener((ChannelFutureListener) channelFuture -> {
-                            log.info("the server response completed:{}");
+                            //log.info("the server response completed:{}");
                         });
                     }
                 }

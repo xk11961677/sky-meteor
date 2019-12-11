@@ -70,7 +70,7 @@
         <module>meteor-remoting</module>
         <module>meteor-rpc</module>
         <module>meteor-serialization</module>
-        <module>meteor-spring-boot</module>
+        <module>meteor-spring-boot-starter</module>
         <module>meteor-example</module>
     </modules>
 

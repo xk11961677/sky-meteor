@@ -10,13 +10,13 @@
     </parent>
 
 
-    <artifactId>meteor-spring-boot</artifactId>
+    <artifactId>meteor-spring-boot-starter</artifactId>
 
     <dependencies>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>meteor-rpc-default</artifactId>
+            <artifactId>meteor-all</artifactId>
             <version>${project.version}</version>
         </dependency>
 

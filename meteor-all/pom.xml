@@ -32,7 +32,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>meteor-spring-boot</artifactId>
+            <artifactId>meteor-rpc-default</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
