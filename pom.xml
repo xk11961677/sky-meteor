@@ -69,6 +69,8 @@
         <module>meteor-registry</module>
         <module>meteor-remoting</module>
         <module>meteor-rpc</module>
+        <module>meteor-filter</module>
+        <module>meteor-config</module>
         <module>meteor-serialization</module>
         <module>meteor-spring-boot-starter</module>
         <module>meteor-example</module>
