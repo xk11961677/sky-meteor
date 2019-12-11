@@ -25,9 +25,9 @@ package com.sky.meteor.spring;
 import com.sky.meteor.registry.Register;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import com.sky.meteor.registry.zookeeper.ZookeeperRegister;
+import com.sky.meteor.remoting.netty.Processor;
 import com.sky.meteor.remoting.netty.client.NettyClient;
 import com.sky.meteor.remoting.netty.server.NettyServer;
-import com.sky.meteor.rpc.Processor;
 import com.sky.meteor.rpc.annotation.Provider;
 import com.sky.meteor.rpc.annotation.Reference;
 import com.sky.meteor.rpc.consumer.ConsumerProcessorHandler;
@@ -55,7 +55,7 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("sky framework rpc startup successfully !");
+        log.info("sky meteor rpc startup successfully !");
     }
 
     @PostConstruct
@@ -87,7 +87,6 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
         }
         Thread thread = new Thread(new Client(properties));
         thread.start();
-        log.info("the rpc client startup successfully !");
     }
 
     /**
@@ -104,15 +103,17 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
         @Override
         public void run() {
             Register register = new ZookeeperRegister();
-            register.setConnect(properties.getRegistry().getAddress());
-            register.setGroup(properties.getRegistry().getGroup());
-            register.setName("zookeeper");
+            RegistryProperties registry = properties.getRegistry();
+            register.setConnect(registry.getAddress());
+            register.setGroup(registry.getGroup());
+            register.setName(registry.getType());
             Processor processor = new ProviderProcessorHandler();
 
             NettyServer nettyServer = new NettyServer(Integer.parseInt(properties.getPort()));
             nettyServer.connectToRegistryServer(register);
             nettyServer.setProcessor(processor);
-            Thread thread = new Thread(() -> {
+
+            new Thread(() -> {
                 Collection<Provider> providers = AnnotationBean.providerConfigs.values();
                 for (Provider provider : providers) {
                     RegisterMeta registerMeta = new RegisterMeta();
@@ -122,8 +123,7 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
                     registerMeta.setVersion(provider.version());
                     nettyServer.getRegistryService().register(registerMeta);
                 }
-            });
-            thread.start();
+            }).start();
             nettyServer.start();
             log.info("the rpc server startup successfully !");
         }
@@ -141,9 +141,10 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
         @Override
         public void run() {
             Register register = new ZookeeperRegister();
-            register.setConnect(properties.getRegistry().getAddress());
-            register.setGroup(properties.getRegistry().getGroup());
-            register.setName("zookeeper");
+            RegistryProperties registry = properties.getRegistry();
+            register.setConnect(registry.getAddress());
+            register.setGroup(registry.getGroup());
+            register.setName(registry.getType());
             Processor processor = new ConsumerProcessorHandler();
 
             NettyClient nettyClient = new NettyClient();
@@ -162,7 +163,7 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
                 serviceMeta.setVersion(reference.version());
                 nettyClient.getRegistryService().subscribe(serviceMeta);
             }
-            log.info("the rpc server startup successfully !");
+            log.info("the rpc client startup successfully !");
         }
     }
 }

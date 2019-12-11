@@ -57,7 +57,7 @@ public class SpiExtensionHolder {
         ServiceLoader<?> services = SpiLoader.loadAll(clazz);
         T t = (T) StreamSupport.stream(services.spliterator(), true)
                 .filter(p -> Objects.equals(p.getClass().getAnnotation(SpiMetadata.class).name(), name))
-                .findFirst().orElseGet((Supplier) () -> SpiLoader.loadName(clazz, clazz.getAnnotation(Spi.class).name()));
+                .findFirst().orElseGet((Supplier) () -> SpiLoader.loadByName(clazz, clazz.getAnnotation(Spi.class).name()));
         this.loadSpiExtension(clazz, t);
         return t;
     }
@@ -68,7 +68,7 @@ public class SpiExtensionHolder {
             synchronized (instance) {
                 obj = extension.get(clazz);
                 if (obj == null) {
-                    obj = SpiLoader.loadName(clazz, clazz.getAnnotation(Spi.class).name());
+                    obj = SpiLoader.loadByName(clazz, clazz.getAnnotation(Spi.class).name());
                     this.loadSpiExtension(clazz, obj);
                 }
             }

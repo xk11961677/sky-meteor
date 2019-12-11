@@ -23,15 +23,17 @@
 package com.sky.meteor.remoting.netty.client;
 
 
+import com.sky.meteor.common.spi.SpiLoader;
+import com.sky.meteor.common.threadpool.ThreadPoolHelper;
 import com.sky.meteor.registry.Register;
 import com.sky.meteor.registry.Registry;
 import com.sky.meteor.registry.RegistryService;
 import com.sky.meteor.remoting.AbstractBootstrap;
+import com.sky.meteor.remoting.netty.InternalHandler;
+import com.sky.meteor.remoting.netty.Processor;
+import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
 import com.sky.meteor.remoting.netty.protocol.ProtocolDecoder;
 import com.sky.meteor.remoting.netty.protocol.ProtocolEncoder;
-import com.sky.meteor.rpc.InternalHandler;
-import com.sky.meteor.rpc.Processor;
-import com.sky.meteor.common.spi.SpiLoader;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -83,8 +85,22 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
     public void stop() {
         if (status()) {
             super.stop();
-            if (group != null) {
-                group.shutdownGracefully();
+            try {
+                ChannelGenericPoolFactory.destroy();
+            } catch (Throwable e) {
+                log.warn(e.getMessage(), e);
+            }
+            try {
+                ThreadPoolHelper.shutdown();
+            } catch (Throwable e) {
+                log.warn(e.getMessage(), e);
+            }
+            try {
+                if (group != null) {
+                    group.shutdownGracefully();
+                }
+            } catch (Throwable e) {
+                log.warn(e.getMessage(), e);
             }
         } else {
             log.info(" the client has been shutdown !");
@@ -117,7 +133,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
 
     @Override
     public void connectToRegistryServer(Register register) {
-        registryService = SpiLoader.loadName(RegistryService.class, register.getName());
+        registryService = SpiLoader.loadByName(RegistryService.class, register.getName());
         registryService.addNotifyListener(new PoolNotifyListener());
         registryService.connectToRegistryServer(register);
     }

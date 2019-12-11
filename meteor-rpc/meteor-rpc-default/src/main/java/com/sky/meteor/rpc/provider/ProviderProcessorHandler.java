@@ -30,7 +30,7 @@ import com.sky.meteor.common.util.ReflectAsmUtils;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.Status;
-import com.sky.meteor.rpc.AbstractProcessor;
+import com.sky.meteor.remoting.netty.AbstractProcessor;
 import com.sky.meteor.rpc.RpcInvocation;
 import com.sky.meteor.serialization.ObjectSerializer;
 import com.sky.meteor.serialization.SerializerHolder;

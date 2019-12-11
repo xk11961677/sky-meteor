@@ -98,7 +98,7 @@ public class SpiLoader {
      * @param <S>
      * @return
      */
-    public static <S> S loadName(final Class<S> clazz, final String name) {
+    public static <S> S loadByName(final Class<S> clazz, final String name) {
         final Iterator<S> iterator = loadAll(clazz).iterator();
         while (iterator.hasNext()) {
             S next = iterator.next();

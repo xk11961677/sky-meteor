@@ -25,6 +25,7 @@ package com.sky.meteor.remoting.netty.client.pool;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import lombok.Getter;
 
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,6 +39,11 @@ public class ChannelGenericPoolFactory {
 
     private static final ReentrantLock lock = new ReentrantLock();
 
+    /**
+     * 创建channel对象池
+     *
+     * @param address
+     */
     public static void create(RegisterMeta.Address address) {
         try {
             lock.lock();
@@ -49,5 +55,15 @@ public class ChannelGenericPoolFactory {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * 销毁所有channel对象池
+     */
+    public static void destroy() {
+        Collection<ChannelGenericPool> values = clientPoolMap.values();
+        values.forEach(pool -> {
+            pool.close();
+        });
     }
 }

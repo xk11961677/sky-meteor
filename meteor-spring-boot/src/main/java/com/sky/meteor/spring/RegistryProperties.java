@@ -35,4 +35,5 @@ public class RegistryProperties {
 
     private String group;
 
+    private String type;
 }

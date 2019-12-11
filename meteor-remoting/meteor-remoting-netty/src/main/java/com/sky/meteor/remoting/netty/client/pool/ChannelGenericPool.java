@@ -48,19 +48,6 @@ public class ChannelGenericPool {
 
     }
 
-    public ChannelGenericPool(NettyClient client) {
-        GenericObjectPool.Config config = new GenericObjectPool.Config();
-        config.maxActive = 20;
-        config.maxWait = 3000;
-        config.maxIdle = 10;
-        config.minIdle = 10;
-        config.testWhileIdle = true;
-        config.numTestsPerEvictionRun = 1;
-        config.timeBetweenEvictionRunsMillis = 10000;
-        pool = new GenericObjectPool(new BaseConnectionFactory(client), config);
-
-    }
-
     public Channel getConnection() throws Exception {
         return (Channel) pool.borrowObject();
     }
@@ -73,9 +60,17 @@ public class ChannelGenericPool {
                 try {
                     channel.close();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.warn("the ChannelGenericPool close channel failed:{}", ex.getMessage());
                 }
             }
+        }
+    }
+
+    public void close() {
+        try {
+            pool.close();
+        } catch (Exception e) {
+            log.warn("the ChannelGenericPool close failed:{}", e.getMessage());
         }
     }
 }

@@ -21,3 +21,34 @@
  * THE SOFTWARE.
  */
 package com.sky.meteor.remoting.netty;
+
+import com.sky.meteor.remoting.Request;
+import com.sky.meteor.remoting.Response;
+import io.netty.channel.ChannelHandlerContext;
+
+/**
+ * @author
+ */
+public abstract class AbstractProcessor implements Processor {
+
+    /**
+     * request handler
+     *
+     * @param ctx
+     * @param request
+     */
+    @Override
+    public void handler(ChannelHandlerContext ctx, Request request) {
+    }
+
+    /**
+     * response handler
+     *
+     * @param ctx
+     * @param response
+     */
+    @Override
+    public void handler(ChannelHandlerContext ctx, Response response) {
+    }
+
+}

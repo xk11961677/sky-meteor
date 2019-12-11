@@ -29,10 +29,10 @@ import com.sky.meteor.registry.Register;
 import com.sky.meteor.registry.Registry;
 import com.sky.meteor.registry.RegistryService;
 import com.sky.meteor.remoting.AbstractBootstrap;
+import com.sky.meteor.remoting.netty.InternalHandler;
+import com.sky.meteor.remoting.netty.Processor;
 import com.sky.meteor.remoting.netty.protocol.ProtocolDecoder;
 import com.sky.meteor.remoting.netty.protocol.ProtocolEncoder;
-import com.sky.meteor.rpc.InternalHandler;
-import com.sky.meteor.rpc.Processor;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -178,7 +178,7 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
 
     @Override
     public void connectToRegistryServer(Register register) {
-        registryService = SpiLoader.loadName(RegistryService.class, register.getName());
+        registryService = SpiLoader.loadByName(RegistryService.class, register.getName());
         this.registryService.connectToRegistryServer(register);
     }
 
