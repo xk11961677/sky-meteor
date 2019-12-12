@@ -23,15 +23,11 @@
 package com.sky.meteor.rpc.consumer.proxy;
 
 
-import com.sky.meteor.cluster.ClusterInvoker;
-import com.sky.meteor.common.spi.SpiExtensionHolder;
-import com.sky.meteor.registry.meta.RegisterMeta;
-import com.sky.meteor.remoting.Request;
+import com.sky.meteor.common.constant.CommonConstants;
 import com.sky.meteor.rpc.RpcInvocation;
 import com.sky.meteor.rpc.annotation.Reference;
 import com.sky.meteor.rpc.consumer.Dispatcher;
 import com.sky.meteor.rpc.consumer.InvokerDispatcher;
-import com.sky.meteor.serialization.ObjectSerializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
@@ -42,7 +38,7 @@ import java.lang.reflect.Method;
 @Slf4j
 public class Proxy {
 
-    private static Dispatcher dispatcher = new InvokerDispatcher();
+    private static final Dispatcher dispatcher = new InvokerDispatcher();
 
     private Class<?> interfaceClass;
 
@@ -54,26 +50,19 @@ public class Proxy {
     }
 
     public Object remoteCall(Method method, Object[] args) {
-        //todo 将信息抽取context 方便filter和interceptor
-        RegisterMeta.ServiceMeta serviceMeta = new RegisterMeta.ServiceMeta();
-        serviceMeta.setGroup(reference.group());
-        serviceMeta.setServiceProviderName(interfaceClass.getName());
-        serviceMeta.setVersion(reference.version());
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setClazzName(interfaceClass.getName());
+        invocation.setMethodName(method.getName());
+        invocation.setParameterTypes(method.getParameterTypes());
+        invocation.setArguments(args);
+        /**
+         * 以下参数均有默认值,可不填写
+         */
+        invocation.setAttachment(CommonConstants.GROUP, reference.group());
+        invocation.setAttachment(CommonConstants.VERSION, reference.version());
+        invocation.setAttachment(CommonConstants.PROVIDER_NAME, reference.name());
 
-        Request request = new Request();
-        RpcInvocation rpcInvocation = new RpcInvocation();
-        rpcInvocation.setClazzName(interfaceClass.getName());
-        rpcInvocation.setMethodName(method.getName());
-        rpcInvocation.setParameterTypes(method.getParameterTypes());
-        rpcInvocation.setArguments(args);
-
-        ObjectSerializer serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
-        byte[] serialize = serializer.serialize(rpcInvocation);
-        request.bytes(serializer.getSchema(), serialize);
-
-        ClusterInvoker invoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
-        Object result = invoker.invoke(dispatcher, request, serviceMeta, method.getReturnType());
-
+        Object result = dispatcher.dispatch(invocation, method.getReturnType());
         return result;
     }
 

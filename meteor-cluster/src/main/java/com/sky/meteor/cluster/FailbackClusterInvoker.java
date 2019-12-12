@@ -22,10 +22,9 @@
  */
 package com.sky.meteor.cluster;
 
-import com.sky.meteor.registry.meta.RegisterMeta;
-import com.sky.meteor.remoting.Request;
 import com.sky.meteor.common.spi.SpiMetadata;
-import com.sky.meteor.rpc.consumer.Dispatcher;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
 
 /**
  * @author
@@ -33,8 +32,9 @@ import com.sky.meteor.rpc.consumer.Dispatcher;
 @SpiMetadata(name = "failback")
 public class FailbackClusterInvoker extends AbstractClusterInvoker {
 
+
     @Override
-    public <T> T invoke(Dispatcher dispatcher, Request request, RegisterMeta.ServiceMeta serviceMeta, Class<?> returnType) {
+    public <T> T invoke(Invoker invoker, Invocation invocation) {
         return null;
     }
 }

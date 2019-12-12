@@ -24,9 +24,8 @@ package com.sky.meteor.cluster;
 
 
 import com.sky.meteor.common.spi.Spi;
-import com.sky.meteor.registry.meta.RegisterMeta;
-import com.sky.meteor.remoting.Request;
-import com.sky.meteor.rpc.consumer.Dispatcher;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
 
 /**
  * @author
@@ -37,12 +36,10 @@ public interface ClusterInvoker {
     /**
      * 执行请求
      *
-     * @param dispatcher
-     * @param request
-     * @param serviceMeta
-     * @param returnType
+     * @param invoker
+     * @param invocation
      * @param <T>
      * @return
      */
-    <T> T invoke(Dispatcher dispatcher, Request request, RegisterMeta.ServiceMeta serviceMeta, Class<?> returnType);
+    <T> T invoke(Invoker invoker, Invocation invocation);
 }

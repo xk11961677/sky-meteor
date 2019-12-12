@@ -20,4 +20,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.rpc.filter;
+package com.sky.meteor.common.constant;
+
+/**
+ * @author
+ */
+public class CommonConstants {
+
+    public final static String GROUP = "group";
+
+    public final static String VERSION = "version";
+
+    public final static String PROVIDER_NAME =  "serviceProviderName";
+
+    public final static String RETRY = "retry";
+
+    public final static String TIMEOUT = "timeout";
+
+}

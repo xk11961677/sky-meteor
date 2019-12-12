@@ -22,10 +22,13 @@
  */
 package com.sky.meteor.cluster;
 
+import com.sky.meteor.common.constant.CommonConstants;
 import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.spi.SpiMetadata;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import com.sky.meteor.remoting.Request;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
 import com.sky.meteor.rpc.consumer.Dispatcher;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 import lombok.extern.slf4j.Slf4j;
@@ -37,15 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 @SpiMetadata(name = "failfast")
 public class FailfastClusterInvoker extends AbstractClusterInvoker {
 
+
     @Override
-    public <T> T invoke(Dispatcher dispatcher, Request request, RegisterMeta.ServiceMeta serviceMeta, Class<?> returnType) {
+    public <T> T invoke(Invoker invoker, Invocation invocation) {
         Object result = null;
-        DefaultInvokeFuture future = dispatcher.dispatch(request, serviceMeta, returnType);
+        DefaultInvokeFuture future = invoker.invoke(invocation);
         try {
-            result = future.getResult();
             if (future.isCompletedExceptionally()) {
                 throw future.getCause();
             }
+            result = future.getResult();
         } catch (Throwable throwable) {
             log.error("failfastClusterInvoker invoke exception:{}", throwable);
             RpcException rpcException = throwable instanceof RpcException ? (RpcException) throwable :

@@ -25,7 +25,6 @@ package com.sky.meteor.remoting.netty.client.pool;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import lombok.Getter;
 
-import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ChannelGenericPoolFactory {
 
     @Getter
-    private static ConcurrentHashMap<RegisterMeta.Address, ChannelGenericPool> clientPoolMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<RegisterMeta.Address, ChannelGenericPool> pools = new ConcurrentHashMap<>();
 
     private static final ReentrantLock lock = new ReentrantLock();
 
@@ -47,10 +46,10 @@ public class ChannelGenericPoolFactory {
     public static void create(RegisterMeta.Address address) {
         try {
             lock.lock();
-            ChannelGenericPool channelGenericPool = clientPoolMap.get(address);
+            ChannelGenericPool channelGenericPool = pools.get(address);
             if (channelGenericPool == null) {
                 channelGenericPool = new ChannelGenericPool(address.getHost() + ":" + address.getPort());
-                clientPoolMap.putIfAbsent(address, channelGenericPool);
+                pools.putIfAbsent(address, channelGenericPool);
             }
         } finally {
             lock.unlock();
@@ -61,9 +60,6 @@ public class ChannelGenericPoolFactory {
      * 销毁所有channel对象池
      */
     public static void destroy() {
-        Collection<ChannelGenericPool> values = clientPoolMap.values();
-        values.forEach(pool -> {
-            pool.close();
-        });
+        pools.values().forEach(pool -> pool.close());
     }
 }

@@ -20,4 +20,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.rpc.interceptor;
+package com.sky.meteor.rpc;
+
+import com.sky.meteor.common.exception.RpcException;
+
+/**
+ * @author
+ */
+public interface Invoker {
+
+    /**
+     * 调用
+     *
+     * @param invocation
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
+    <T> T invoke(Invocation invocation) throws RpcException;
+
+}

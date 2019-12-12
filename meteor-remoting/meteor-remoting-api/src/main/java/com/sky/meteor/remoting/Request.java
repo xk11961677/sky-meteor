@@ -49,6 +49,7 @@ public class Request extends PayloadHolder {
 
     public Request(long id) {
         this.id = id;
+        this.timestamp = System.currentTimeMillis();
     }
 
 }

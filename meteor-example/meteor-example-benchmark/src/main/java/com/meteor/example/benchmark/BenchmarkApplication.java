@@ -90,6 +90,11 @@ public class BenchmarkApplication {
             }
 
             @Override
+            public String name() {
+                return "com.sky.meteor.example.api.ExampleApi";
+            }
+
+            @Override
             public String group() {
                 return "example";
             }

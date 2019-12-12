@@ -12,7 +12,7 @@
     <artifactId>meteor-all</artifactId>
     <name>meteor-all</name>
     <description>meteor all ${project.version}</description>
-    <url>https://github.com/xk11961677/framework</url>
+    <url>https://github.com/xk11961677/sky-meteor</url>
 
     <!--<dependencyManagement>
         <dependencies>

@@ -23,8 +23,8 @@
 package com.sky.meteor.rpc.consumer;
 
 
-import com.sky.meteor.registry.meta.RegisterMeta;
-import com.sky.meteor.remoting.Request;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.RpcInvocation;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 
 /**
@@ -35,11 +35,10 @@ public interface Dispatcher {
     /**
      * 执行远程调用,获取结果
      *
-     * @param request
-     * @param serviceMeta
+     * @param invocation
      * @param returnType
      * @return
      */
-    DefaultInvokeFuture dispatch(Request request, RegisterMeta.ServiceMeta serviceMeta, Class<?> returnType);
+    Object dispatch(Invocation invocation, Class<?> returnType);
 
 }

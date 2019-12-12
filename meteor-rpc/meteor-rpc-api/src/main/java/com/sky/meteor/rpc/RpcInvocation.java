@@ -25,6 +25,7 @@ package com.sky.meteor.rpc;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,13 +47,16 @@ public class RpcInvocation implements Invocation, Serializable {
 
     @Override
     public void setAttachment(String key, String value) {
+        if (attachments == null) {
+            attachments = new HashMap<>();
+        }
         attachments.put(key, value);
     }
 
     @Override
     public void setAttachmentIfAbsent(String key, String value) {
         if (attachments.get(key) == null) {
-            attachments.put(key, value);
+            setAttachment(key, value);
         }
     }
 
@@ -64,6 +68,6 @@ public class RpcInvocation implements Invocation, Serializable {
     @Override
     public String getAttachment(String key, String defaultValue) {
         String value = attachments.get(key);
-        return value == null ? defaultValue : value;
+        return (value == null || "".equals(value)) ? defaultValue : value;
     }
 }

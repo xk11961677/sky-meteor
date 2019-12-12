@@ -22,7 +22,11 @@
  */
 package com.sky.meteor.rpc.consumer;
 
+import com.sky.meteor.cluster.ClusterInvoker;
 import com.sky.meteor.cluster.loadbalance.LoadBalance;
+import com.sky.meteor.common.constant.CommonConstants;
+import com.sky.meteor.common.exception.RpcException;
+import com.sky.meteor.common.spi.SpiExtensionHolder;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
@@ -30,9 +34,10 @@ import com.sky.meteor.remoting.Status;
 import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPool;
 import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
 import com.sky.meteor.remoting.protocol.LongSequenceHelper;
-import com.sky.meteor.common.spi.SpiExtensionHolder;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
-import com.sky.meteor.common.exception.RpcException;
+import com.sky.meteor.serialization.ObjectSerializer;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,47 +48,77 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InvokerDispatcher implements Dispatcher {
 
-
     @Override
-    public DefaultInvokeFuture dispatch(Request request, RegisterMeta.ServiceMeta serviceMeta, Class<?> returnType) {
-        LoadBalance instance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
-        RegisterMeta.Address select = instance.select(serviceMeta);
+    public Object dispatch(Invocation invocation, Class<?> returnType) {
 
-        ChannelGenericPool channelGenericPool = ChannelGenericPoolFactory.getClientPoolMap().get(select);
-        Channel channel = null;
-        DefaultInvokeFuture invokeFuture = null;
-        try {
-            channel = channelGenericPool.getConnection();
-            invokeFuture = $invoke(channel, request, returnType);
-        } catch (Exception e) {
-            log.error("dispatcher exception:{}", e);
-            throw new RpcException(Status.CLIENT_ERROR.getKey(), Status.CLIENT_ERROR.getValue(), e);
-        } finally {
-            channelGenericPool.releaseConnection(channel);
-        }
-        return invokeFuture;
+        Invoker invoker = new InvokerWrapper(invocation, returnType);
+        ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
+        Object result = clusterInvoker.invoke(invoker, invocation);
+        return result;
     }
 
+    class InvokerWrapper implements Invoker {
 
-    /**
-     * doInvoke
-     *
-     * @return
-     * @throws Exception
-     */
-    private DefaultInvokeFuture $invoke(Channel channel, Request request, Class<?> returnType) throws Exception {
-        DefaultInvokeFuture<?> invokeFuture = null;
-        long id = LongSequenceHelper.getId();
-        try {
-            request.setId(id);
-            invokeFuture = DefaultInvokeFuture.with(id, 0, returnType);
-            channel.writeAndFlush(request);
-        } catch (Exception e) {
-            log.error("the client proxy invoke failed:{}", e.getMessage());
-            Response response = new Response(id);
-            response.setStatus(Status.CLIENT_ERROR.getKey());
-            DefaultInvokeFuture.fakeReceived(response);
+        Invocation invocation;
+
+        Class<?> returnType;
+
+        Request request;
+
+        long id;
+
+        InvokerWrapper(Invocation invocation, Class<?> returnType) {
+            this.invocation = invocation;
+            this.returnType = returnType;
+            this.id = LongSequenceHelper.getId();
         }
-        return invokeFuture;
+
+
+        @Override
+        public <T> T invoke(Invocation invocation) throws RpcException {
+            request = new Request(id);
+            ObjectSerializer serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
+            byte[] serialize = serializer.serialize(invocation);
+            request.bytes(serializer.getSchema(), serialize);
+            return (T) doInvoke();
+        }
+
+        private RegisterMeta.Address getAddress() {
+            String group = invocation.getAttachment(CommonConstants.GROUP);
+            String version = invocation.getAttachment(CommonConstants.VERSION, "1.0.0");
+            String providerName = invocation.getAttachment(CommonConstants.PROVIDER_NAME, invocation.getClazzName());
+
+            RegisterMeta.ServiceMeta serviceMeta = new RegisterMeta.ServiceMeta(group, providerName, version);
+            LoadBalance instance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
+            return instance.select(serviceMeta);
+        }
+
+        private DefaultInvokeFuture doInvoke() {
+            RegisterMeta.Address address = getAddress();
+            long timeout = Long.parseLong(invocation.getAttachment(CommonConstants.TIMEOUT, "0"));
+
+            //todo 对象池每次请求需要一个channel不太好, 性能待优化
+            ChannelGenericPool channelGenericPool = ChannelGenericPoolFactory.getPools().get(address);
+            DefaultInvokeFuture invokeFuture = null;
+            Channel channel = null;
+            try {
+                channel = channelGenericPool.getConnection();
+                try {
+                    invokeFuture = DefaultInvokeFuture.with(id, timeout, returnType);
+                    channel.writeAndFlush(request);
+                } catch (Exception e) {
+                    log.error("the client invoke failed:{}", e.getMessage());
+                    Response response = new Response(id);
+                    response.setStatus(Status.CLIENT_ERROR.getKey());
+                    DefaultInvokeFuture.fakeReceived(response);
+                }
+            } catch (Exception e) {
+                log.error("InvokerWrapper exception:{}", e);
+                throw new RpcException(Status.CLIENT_ERROR.getKey(), Status.CLIENT_ERROR.getValue(), e);
+            } finally {
+                channelGenericPool.releaseConnection(channel);
+            }
+            return invokeFuture;
+        }
     }
 }
