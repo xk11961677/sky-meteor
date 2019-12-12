@@ -45,6 +45,14 @@
             <version>${jmh.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.taobao</groupId>
+            <artifactId>stresstester</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/stresstester-1.0.jar</systemPath>
+        </dependency>
     </dependencies>
 
 
