@@ -25,7 +25,6 @@ package com.sky.meteor.remoting.netty.client;
 import com.sky.meteor.remoting.protocol.ProtocolHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -36,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author
  */
 @Slf4j
-@ChannelHandler.Sharable
 public class HeartbeatChannelHandler extends ChannelInboundHandlerAdapter {
 
     /**

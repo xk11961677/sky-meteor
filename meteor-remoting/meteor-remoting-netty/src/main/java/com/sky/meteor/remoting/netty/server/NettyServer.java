@@ -40,6 +40,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.flush.FlushConsolidationHandler;
+import io.netty.util.Version;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +101,7 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
             channel = channelFuture.channel();
             Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
-            log.info("the server start successfully !");
+            log.info("the server start successfully ! {}", Version.identify().entrySet());
             channel.closeFuture().sync();
         } catch (Exception e) {
             log.error("the server start failed:{}", e.getMessage());

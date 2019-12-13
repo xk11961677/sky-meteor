@@ -42,10 +42,10 @@ public class FailsafeClusterInvoker extends AbstractClusterInvoker {
         Object result = null;
         DefaultInvokeFuture future = invoker.invoke(invocation);
         try {
+            result = future.getResult();
             if (future.isCompletedExceptionally()) {
                 throw future.getCause();
             }
-            result = future.getResult();
         } catch (Throwable throwable) {
             log.warn("failsafeClusterInvoker invoke exception:{}", throwable);
         }

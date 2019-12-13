@@ -46,10 +46,10 @@ public class FailoverClusterInvoker extends AbstractClusterInvoker {
             retry--;
             DefaultInvokeFuture future = invoker.invoke(invocation);
             try {
+                result = future.getResult();
                 if (future.isCompletedExceptionally()) {
                     throw future.getCause();
                 }
-                result = future.getResult();
                 break;
             } catch (Throwable throwable) {
                 if (retry == 0) {

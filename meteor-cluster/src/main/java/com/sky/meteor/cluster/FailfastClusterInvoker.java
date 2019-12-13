@@ -46,10 +46,10 @@ public class FailfastClusterInvoker extends AbstractClusterInvoker {
         Object result = null;
         DefaultInvokeFuture future = invoker.invoke(invocation);
         try {
+            result = future.getResult();
             if (future.isCompletedExceptionally()) {
                 throw future.getCause();
             }
-            result = future.getResult();
         } catch (Throwable throwable) {
             log.error("failfastClusterInvoker invoke exception:{}", throwable);
             RpcException rpcException = throwable instanceof RpcException ? (RpcException) throwable :
