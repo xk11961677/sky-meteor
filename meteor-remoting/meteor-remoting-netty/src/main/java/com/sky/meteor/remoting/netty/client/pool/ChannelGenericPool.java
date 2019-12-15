@@ -22,6 +22,7 @@
  */
 package com.sky.meteor.remoting.netty.client.pool;
 
+import com.sky.meteor.common.config.ConfigManager;
 import com.sky.meteor.remoting.netty.client.NettyClient;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +38,10 @@ public class ChannelGenericPool {
 
     public ChannelGenericPool(String key) {
         GenericObjectPool.Config config = new GenericObjectPool.Config();
-        config.maxActive = 20;
+        config.maxActive = ConfigManager.clientPoolMaxActive();
         config.maxWait = 3000;
-        config.maxIdle = 10;
-        config.minIdle = 10;
+        config.maxIdle = ConfigManager.clientPoolMaxIdle();
+        config.minIdle = ConfigManager.clientPoolMinIdle();
         config.testWhileIdle = true;
         config.numTestsPerEvictionRun = 1;
         config.timeBetweenEvictionRunsMillis = 10000;

@@ -72,7 +72,7 @@ public class QPSApplication {
         nettyClient = new NettyClient();
         nettyClient.connectToRegistryServer(register);
         nettyClient.setProcessor(processor);
-        nettyClient.start();
+        nettyClient.startup();
 
         reference = new Reference() {
             @Override
@@ -130,7 +130,7 @@ public class QPSApplication {
      * 关闭
      */
     public void shutdown() {
-        nettyClient.stop();
+        nettyClient.shutdown();
         System.out.println("=============shutdown=============");
     }
 

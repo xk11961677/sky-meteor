@@ -30,12 +30,12 @@ public interface Bootstrap {
     /**
      * 启动
      */
-    void start();
+    void startup();
 
     /**
      * 停止
      */
-    void stop();
+    void shutdown();
 
     /**
      * 状态

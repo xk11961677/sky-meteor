@@ -23,6 +23,7 @@
 package com.sky.meteor.remoting.netty.server;
 
 
+import com.sky.meteor.common.config.ConfigManager;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
 import com.sky.meteor.common.threadpool.ThreadPoolHelper;
 import com.sky.meteor.registry.Register;
@@ -36,6 +37,9 @@ import com.sky.meteor.remoting.netty.protocol.ProtocolEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -94,26 +98,26 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
 
 
     @Override
-    public void start() {
-        super.start();
+    public void startup() {
+        super.startup();
         try {
             this.init();
             ChannelFuture channelFuture = bootstrap.bind(port).sync();
             channel = channelFuture.channel();
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
-            log.info("the server start successfully ! {}", Version.identify().entrySet());
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
+            log.info("the remoting server startup successfully ! {}", Version.identify().entrySet());
             channel.closeFuture().sync();
         } catch (Exception e) {
-            log.error("the server start failed:{}", e.getMessage());
-            stop();
+            log.error("the remoting server startup failed:{}", e.getMessage());
+            shutdown();
         }
     }
 
 
     @Override
-    public void stop() {
+    public void shutdown() {
         if (status()) {
-            super.stop();
+            super.shutdown();
             try {
                 ThreadPoolHelper.shutdown();
             } catch (Throwable e) {
@@ -135,7 +139,7 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
                 log.warn(e.getMessage(), e);
             }
         } else {
-            log.info(" the server has been shutdown !");
+            log.info(" the remoting server has been shutdown !");
         }
     }
 
@@ -144,18 +148,22 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
      */
     @Override
     public void init() {
-        //epoll kqueue
-        bossGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("boss", true));
-        workerGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("worker", true));
+        if (ConfigManager.nettyEpoll() && Epoll.isAvailable()) {
+            bossGroup = new EpollEventLoopGroup(0, new DefaultThreadFactory("netty_boss", true));
+            workerGroup = new EpollEventLoopGroup(0, new DefaultThreadFactory("netty_worker", true));
+        } else {
+            bossGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("netty_boss", true));
+            workerGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("netty_worker", true));
+        }
         ServerChannelHandler serverChannelHandler = new ServerChannelHandler(processor);
         MetricsChannelHandler metricsChannelHandler = new MetricsChannelHandler();
         /*LoggingHandler loggingHandler = new LoggingHandler(LogLevel.INFO);*/
         try {
             bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
-                    .option(ChannelOption.SO_REUSEADDR, true)
+                    .channel(bossGroup instanceof NioEventLoopGroup ? NioServerSocketChannel.class : EpollServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, ConfigManager.tcpSoBacklog())
+                    .option(ChannelOption.SO_REUSEADDR, ConfigManager.tcpSoReuseaddr())
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
@@ -169,11 +177,11 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
                             p.addLast("serverChannelHandler", serverChannelHandler);
                         }
                     })
-                    .childOption(ChannelOption.TCP_NODELAY, true)
-                    .childOption(ChannelOption.SO_REUSEADDR, true)
+                    .childOption(ChannelOption.TCP_NODELAY, ConfigManager.tcpNodelay())
+                    .childOption(ChannelOption.SO_REUSEADDR, ConfigManager.tcpSoReuseaddr())
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         } catch (Exception e) {
-            log.error("the server init failed:{}", e.getMessage());
+            log.error("the remoting server init failed:{}", e.getMessage());
         }
     }
 

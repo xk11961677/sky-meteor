@@ -124,7 +124,7 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
                     nettyServer.getRegistryService().register(registerMeta);
                 }
             }).start();
-            nettyServer.start();
+            nettyServer.startup();
             log.info("the rpc server startup successfully !");
         }
     }
@@ -150,9 +150,9 @@ public class MeteorAutoConfiguration implements CommandLineRunner {
             NettyClient nettyClient = new NettyClient();
             nettyClient.connectToRegistryServer(register);
             nettyClient.setProcessor(processor);
-            nettyClient.start();
+            nettyClient.startup();
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> nettyClient.stop()));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> nettyClient.shutdown()));
 
             Collection<ReferenceBean> referenceBeans = AnnotationBean.referenceConfigs.values();
             for (ReferenceBean referenceBean : referenceBeans) {

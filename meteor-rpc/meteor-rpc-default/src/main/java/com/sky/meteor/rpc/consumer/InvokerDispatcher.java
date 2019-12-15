@@ -37,6 +37,7 @@ import com.sky.meteor.remoting.protocol.LongSequenceHelper;
 import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
+import com.sky.meteor.rpc.future.InvokeFuture;
 import com.sky.meteor.serialization.ObjectSerializer;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -93,13 +94,13 @@ public class InvokerDispatcher implements Dispatcher {
             return instance.select(serviceMeta);
         }
 
-        private DefaultInvokeFuture doInvoke() {
+        private InvokeFuture doInvoke() {
             RegisterMeta.Address address = getAddress();
             long timeout = Long.parseLong(invocation.getAttachment(CommonConstants.TIMEOUT, "0"));
 
             //todo 对象池每次请求需要一个channel不太好, 性能待优化
             ChannelGenericPool channelGenericPool = ChannelGenericPoolFactory.getPools().get(address);
-            DefaultInvokeFuture invokeFuture = null;
+            InvokeFuture invokeFuture = null;
             Channel channel = null;
             try {
                 channel = channelGenericPool.getConnection();
@@ -107,7 +108,7 @@ public class InvokerDispatcher implements Dispatcher {
                     invokeFuture = DefaultInvokeFuture.with(id, timeout, returnType);
                     channel.writeAndFlush(request);
                 } catch (Exception e) {
-                    log.error("the client invoke failed:{}", e.getMessage());
+                    log.error("the client invoke failed:{}", e);
                     Response response = new Response(id);
                     response.setStatus(Status.CLIENT_ERROR.getKey());
                     DefaultInvokeFuture.fakeReceived(response);

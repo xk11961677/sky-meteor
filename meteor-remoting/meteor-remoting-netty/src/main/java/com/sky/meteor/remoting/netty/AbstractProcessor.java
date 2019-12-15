@@ -22,6 +22,9 @@
  */
 package com.sky.meteor.remoting.netty;
 
+import com.sky.meteor.common.config.ConfigManager;
+import com.sky.meteor.common.threadpool.ThreadPoolHelper;
+import com.sky.meteor.common.threadpool.ThreadPoolProperties;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
 import io.netty.channel.ChannelHandlerContext;
@@ -51,4 +54,16 @@ public abstract class AbstractProcessor implements Processor {
     public void handler(ChannelHandlerContext ctx, Response response) {
     }
 
+    /**
+     * 创建业务线程池
+     */
+    public void executors() {
+        ThreadPoolProperties properties = new ThreadPoolProperties();
+        properties.setCorePoolSize(ConfigManager.tpCorePoolSize());
+        properties.setMaximumPoolSize(ConfigManager.tpMaximumPoolSize());
+        properties.setInitialCapacity(ConfigManager.TpInitialCapacity());
+        properties.setKeepAliveTime(ConfigManager.tpKeepAliveTime());
+        properties.setDiscard(ConfigManager.tpDiscardSwitch());
+        ThreadPoolHelper.newExtendThreadPool(properties);
+    }
 }

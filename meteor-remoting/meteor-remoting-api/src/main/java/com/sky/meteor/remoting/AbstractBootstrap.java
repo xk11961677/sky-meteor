@@ -32,13 +32,13 @@ public abstract class AbstractBootstrap implements Bootstrap {
     private final AtomicBoolean status = new AtomicBoolean(false);
 
     @Override
-    public void start() {
+    public void startup() {
         status.compareAndSet(false, true);
     }
 
 
     @Override
-    public void stop() {
+    public void shutdown() {
         status.compareAndSet(true, false);
     }
 

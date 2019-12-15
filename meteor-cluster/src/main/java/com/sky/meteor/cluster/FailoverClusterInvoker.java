@@ -27,7 +27,7 @@ import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.spi.SpiMetadata;
 import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
-import com.sky.meteor.rpc.future.DefaultInvokeFuture;
+import com.sky.meteor.rpc.future.InvokeFuture;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,10 +44,10 @@ public class FailoverClusterInvoker extends AbstractClusterInvoker {
         int retry = Integer.parseInt(invocation.getAttachment(CommonConstants.RETRY, "3"));
         while (retry > 0) {
             retry--;
-            DefaultInvokeFuture future = invoker.invoke(invocation);
+            InvokeFuture future = invoker.invoke(invocation);
             try {
                 result = future.getResult();
-                if (future.isCompletedExceptionally()) {
+                if (future.getCause() != null) {
                     throw future.getCause();
                 }
                 break;

@@ -81,7 +81,7 @@ public class BenchmarkApplication {
         nettyClient = new NettyClient();
         nettyClient.connectToRegistryServer(register);
         nettyClient.setProcessor(processor);
-        nettyClient.start();
+        nettyClient.startup();
 
         reference = new Reference() {
             @Override
@@ -118,7 +118,7 @@ public class BenchmarkApplication {
 
     @TearDown
     public void shutdown() {
-        nettyClient.stop();
+        nettyClient.shutdown();
         System.out.println("=============shutdown=============");
     }
 

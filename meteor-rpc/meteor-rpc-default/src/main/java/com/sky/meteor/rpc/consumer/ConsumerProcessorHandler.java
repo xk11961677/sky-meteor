@@ -24,7 +24,6 @@ package com.sky.meteor.rpc.consumer;
 
 import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
 import com.sky.meteor.common.threadpool.ThreadPoolHelper;
-import com.sky.meteor.common.threadpool.ThreadPoolProperties;
 import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.netty.AbstractProcessor;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
@@ -38,7 +37,7 @@ import io.netty.channel.ChannelHandlerContext;
 public class ConsumerProcessorHandler extends AbstractProcessor {
 
     public ConsumerProcessorHandler() {
-        ThreadPoolHelper.newExtendThreadPool(new ThreadPoolProperties());
+        super.executors();
     }
 
     @Override

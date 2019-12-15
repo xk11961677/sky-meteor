@@ -25,7 +25,6 @@ package com.sky.meteor.rpc.provider;
 
 import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
 import com.sky.meteor.common.threadpool.ThreadPoolHelper;
-import com.sky.meteor.common.threadpool.ThreadPoolProperties;
 import com.sky.meteor.common.util.ReflectAsmUtils;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
@@ -48,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProviderProcessorHandler extends AbstractProcessor {
 
     public ProviderProcessorHandler() {
-        ThreadPoolHelper.newExtendThreadPool(new ThreadPoolProperties());
+        super.executors();
     }
 
     @Override
@@ -88,4 +87,6 @@ public class ProviderProcessorHandler extends AbstractProcessor {
             }
         });
     }
+
+
 }

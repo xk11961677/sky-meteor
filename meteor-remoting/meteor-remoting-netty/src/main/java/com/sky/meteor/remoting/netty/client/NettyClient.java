@@ -23,6 +23,7 @@
 package com.sky.meteor.remoting.netty.client;
 
 
+import com.sky.meteor.common.config.ConfigManager;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
 import com.sky.meteor.common.threadpool.ThreadPoolHelper;
 import com.sky.meteor.registry.Register;
@@ -75,16 +76,16 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
     }
 
     @Override
-    public void start() {
-        super.start();
+    public void startup() {
+        super.startup();
         this.init();
     }
 
 
     @Override
-    public void stop() {
+    public void shutdown() {
         if (status()) {
-            super.stop();
+            super.shutdown();
             try {
                 ChannelGenericPoolFactory.destroy();
             } catch (Throwable e) {
@@ -103,7 +104,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
                 log.warn(e.getMessage(), e);
             }
         } else {
-            log.info(" the client has been shutdown !");
+            log.info(" the remoting client has been shutdown !");
         }
     }
 
@@ -115,7 +116,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
         bootstrap = new Bootstrap();
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
-                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.TCP_NODELAY, ConfigManager.tcpNodelay())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
@@ -177,7 +178,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
             Channel channel = f.channel();
             return channel;
         } catch (Exception e) {
-            log.error("the client get channel failed! :{}", e.getMessage());
+            log.error("the remoting client get channel failed! :{}", e.getMessage());
         }
         return null;
     }

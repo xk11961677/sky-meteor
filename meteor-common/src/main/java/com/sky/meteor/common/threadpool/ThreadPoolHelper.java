@@ -55,13 +55,16 @@ public final class ThreadPoolHelper {
      * @since
      */
     public static ExtendThreadPoolExecutor newExtendThreadPool(ThreadPoolProperties threadPoolProperties) {
+        if (extendExecutorService != null) {
+            return (ExtendThreadPoolExecutor) extendExecutorService;
+        }
+
         int corePoolSize = threadPoolProperties.getCorePoolSize();
         int maximumPoolSize = threadPoolProperties.getMaximumPoolSize();
         int initialCapacity = threadPoolProperties.getInitialCapacity();
         long keepAliveTime = threadPoolProperties.getKeepAliveTime();
         String threadName = threadPoolProperties.getThreadName();
         boolean discard = threadPoolProperties.isDiscard();
-
         /**
          * 增加构造队列容量参数
          */
