@@ -25,6 +25,7 @@ package com.sky.meteor.rpc.consumer;
 import com.sky.meteor.cluster.ClusterInvoker;
 import com.sky.meteor.cluster.loadbalance.LoadBalance;
 import com.sky.meteor.common.constant.CommonConstants;
+import com.sky.meteor.common.enums.SideEnum;
 import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
 import com.sky.meteor.common.spi.SpiLoader;
@@ -39,6 +40,7 @@ import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
 import com.sky.meteor.rpc.RpcContext;
 import com.sky.meteor.rpc.filter.Filter;
+import com.sky.meteor.rpc.filter.FilterBuilder;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 import com.sky.meteor.rpc.future.InvokeFuture;
 import com.sky.meteor.serialization.ObjectSerializer;
@@ -63,17 +65,15 @@ public class InvokerDispatcher implements Dispatcher {
 
     public InvokerDispatcher() {
         ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
-        InvokerWrapper invokerWrapper = new InvokerWrapper();
+        ClientInvoker invokerWrapper = new ClientInvoker();
         Invoker last = new Invoker() {
             @Override
             public <T> T invoke(Invocation invocation) throws RpcException {
                 return clusterInvoker.invoke(invokerWrapper, invocation);
             }
         };
-        chain = build(last);
-
+        chain = FilterBuilder.build(last, SideEnum.CONSUMER);
         serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
-
         loadBalance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
     }
 
@@ -81,6 +81,7 @@ public class InvokerDispatcher implements Dispatcher {
     public Object dispatch(Invocation invocation, Class<?> returnType) {
         Object result;
         try {
+            RpcContext.getContext().get().setAttachment(CommonConstants.SIDE, SideEnum.CONSUMER.getKey());
             RpcContext.getContext().get().setReturnType(returnType);
             Map<String, String> attachments = invocation.getAttachments();
             for (Map.Entry<String, String> entry : attachments.entrySet()) {
@@ -93,43 +94,11 @@ public class InvokerDispatcher implements Dispatcher {
         return result;
     }
 
-    /**
-     * 创建责任链
-     *
-     * @param last
-     * @return
-     */
-    private Invoker build(Invoker last) {
-        List<Filter> filters = SpiLoader.loadAllPriority(Filter.class);
-        Invoker next = last;
-        for (Filter filter : filters) {
-            next = getNode(filter, next);
-        }
-        return next;
-    }
-
-    /**
-     * 获取节点
-     *
-     * @param filter
-     * @param next
-     * @return
-     */
-    private Invoker getNode(Filter filter, Invoker next) {
-        Invoker invoker = new Invoker() {
-            @Override
-            public <T> T invoke(Invocation invocation) throws RpcException {
-                return filter.invoke(next, invocation);
-            }
-        };
-        return invoker;
-    }
 
     /**
      * invoker尾节点,进行远程调用
      */
-    private class InvokerWrapper implements Invoker {
-
+    private class ClientInvoker implements Invoker {
         @Override
         public <T> T invoke(Invocation invocation) throws RpcException {
             long id = LongSequenceHelper.getId();

@@ -22,7 +22,11 @@
  */
 package com.sky.meteor.common.spi;
 
+import com.sky.meteor.common.enums.SideEnum;
+
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author
@@ -88,6 +92,20 @@ public class SpiLoader {
             return firstMetadata.priority() - secondMetadata.priority();
         });
         return list;
+    }
+
+    /**
+     * @param clazz
+     * @param <S>
+     * @return
+     */
+    public static <S> List<S> loadAllPriorityAndSide(final Class<S> clazz, SideEnum side) {
+        List<S> list = loadAllPriority(clazz);
+        List<S> newList = list.stream().filter(f -> {
+            SideEnum sideEnum = f.getClass().getAnnotation(SpiMetadata.class).side();
+            return sideEnum.equals(SideEnum.ALL) || sideEnum.equals(side);
+        }).collect(Collectors.toList());
+        return newList;
     }
 
     /**

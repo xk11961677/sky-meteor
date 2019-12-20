@@ -45,14 +45,6 @@ public class RpcContext {
         return serverContext;
     }
 
-    public static void remove() {
-        context.remove();
-    }
-
-    public static void removeServer() {
-        serverContext.remove();
-    }
-
     @Getter
     @Setter
     private Invoker invoker;
@@ -88,5 +80,9 @@ public class RpcContext {
     public String getAttachment(String key, String defaultValue) {
         String value = attachments.get(key);
         return (value == null || "".equals(value)) ? defaultValue : value;
+    }
+
+    public Map<String, String> getAttachment() {
+        return attachments;
     }
 }

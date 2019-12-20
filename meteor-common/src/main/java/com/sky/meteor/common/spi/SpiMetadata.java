@@ -22,6 +22,8 @@
  */
 package com.sky.meteor.common.spi;
 
+import com.sky.meteor.common.enums.SideEnum;
+
 import java.lang.annotation.*;
 
 /**
@@ -45,4 +47,11 @@ public @interface SpiMetadata {
      * @return
      */
     int priority() default 0;
+
+    /**
+     * 扩展类用于provider or consumer
+     *
+     * @return
+     */
+    SideEnum side() default SideEnum.ALL;
 }

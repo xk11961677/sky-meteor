@@ -22,22 +22,48 @@
  */
 package com.sky.meteor.rpc.filter;
 
+import com.sky.meteor.common.enums.SideEnum;
 import com.sky.meteor.common.exception.RpcException;
+import com.sky.meteor.common.spi.SpiLoader;
 import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
+
+import java.util.List;
 
 /**
  * @author
  */
-public interface Filter {
+public class FilterBuilder {
 
     /**
+     * 创建责任链
      *
-     * @param invoker
-     * @param invocation
-     * @param <T>
+     * @param last
      * @return
-     * @throws RpcException
      */
-    <T> T invoke(Invoker invoker, Invocation invocation) throws RpcException;
+    public static Invoker build(Invoker last, SideEnum side) {
+        List<Filter> filters = SpiLoader.loadAllPriorityAndSide(Filter.class, side);
+        Invoker next = last;
+        for (Filter filter : filters) {
+            next = getNode(filter, next);
+        }
+        return next;
+    }
+
+    /**
+     * 获取节点
+     *
+     * @param filter
+     * @param next
+     * @return
+     */
+    private static Invoker getNode(Filter filter, Invoker next) {
+        Invoker invoker = new Invoker() {
+            @Override
+            public <T> T invoke(Invocation invocation) throws RpcException {
+                return filter.invoke(next, invocation);
+            }
+        };
+        return invoker;
+    }
 }

@@ -31,14 +31,12 @@ public class CommonConstants {
 
     public final static String VERSION = "version";
 
-    public final static String PROVIDER_NAME =  "serviceProviderName";
+    public final static String PROVIDER_NAME = "serviceProviderName";
 
     public final static String RETRY = "retry";
 
     public final static String TIMEOUT = "timeout";
 
-    public final static String FILTER_TYPE = "filter_type";
-
-    public final static String FILTER_SIDE = "filter_side";
+    public final static String SIDE = "side";
 
 }

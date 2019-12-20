@@ -23,6 +23,9 @@
 package com.sky.meteor.rpc.provider;
 
 
+import com.sky.meteor.common.constant.CommonConstants;
+import com.sky.meteor.common.enums.SideEnum;
+import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.threadpool.DefaultAsynchronousHandler;
 import com.sky.meteor.common.threadpool.ThreadPoolHelper;
 import com.sky.meteor.common.util.ReflectAsmUtils;
@@ -30,7 +33,11 @@ import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.Status;
 import com.sky.meteor.remoting.netty.AbstractProcessor;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
+import com.sky.meteor.rpc.RpcContext;
 import com.sky.meteor.rpc.RpcInvocation;
+import com.sky.meteor.rpc.filter.FilterBuilder;
 import com.sky.meteor.serialization.ObjectSerializer;
 import com.sky.meteor.serialization.SerializerHolder;
 import io.netty.channel.Channel;
@@ -39,15 +46,16 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * todo 修改线程池
- *
  * @author
  */
 @Slf4j
 public class ProviderProcessorHandler extends AbstractProcessor {
 
+    private Invoker chain;
+
     public ProviderProcessorHandler() {
         super.executors();
+        chain = FilterBuilder.build(new ServerInvoker(), SideEnum.PROVIDER);
     }
 
     @Override
@@ -60,22 +68,21 @@ public class ProviderProcessorHandler extends AbstractProcessor {
                 response.setStatus(Status.OK.getKey());
                 response.setSerializerCode(request.getSerializerCode());
                 try {
+                    RpcContext.getServerContext().get().setAttachment(CommonConstants.SIDE, SideEnum.PROVIDER.getKey());
+
                     ObjectSerializer serializer = SerializerHolder.getInstance().getSerializer(request.getSerializerCode());
-
                     byte[] bytes = request.getBytes();
-                    RpcInvocation rpcInvocation = serializer.deSerialize(bytes, RpcInvocation.class);
+                    RpcInvocation invocation = serializer.deSerialize(bytes, RpcInvocation.class);
 
-                    Object result = ReflectAsmUtils.invoke(rpcInvocation.getClazzName(),
-                            rpcInvocation.getMethodName(),
-                            rpcInvocation.getParameterTypes(), rpcInvocation.getArguments());
+                    Object result = chain.invoke(invocation);
 
                     byte[] body = serializer.serialize(result);
                     response.setBytes(body);
-
                 } catch (Exception e) {
                     response.setStatus(Status.SERVER_ERROR.getKey());
                     log.error("the server exception :{}", e);
                 } finally {
+                    RpcContext.getServerContext().remove();
                     Channel channel = ctx.channel();
                     if (channel.isActive() && channel.isWritable()) {
                         channel.writeAndFlush(response).addListener((ChannelFutureListener) channelFuture -> {
@@ -88,5 +95,13 @@ public class ProviderProcessorHandler extends AbstractProcessor {
         });
     }
 
-
+    private class ServerInvoker implements Invoker {
+        @Override
+        public <T> T invoke(Invocation invocation) throws RpcException {
+            Object result = ReflectAsmUtils.invoke(invocation.getClazzName(),
+                    invocation.getMethodName(),
+                    invocation.getParameterTypes(), invocation.getArguments());
+            return (T) result;
+        }
+    }
 }

@@ -20,24 +20,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.rpc.filter;
+package com.sky.meteor.common.enums;
 
-import com.sky.meteor.common.exception.RpcException;
-import com.sky.meteor.rpc.Invocation;
-import com.sky.meteor.rpc.Invoker;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author
  */
-public interface Filter {
+public enum SideEnum {
+    CONSUMER("consumer"),
+    PROVIDER("provider"),
+    ALL("all");
 
-    /**
-     *
-     * @param invoker
-     * @param invocation
-     * @param <T>
-     * @return
-     * @throws RpcException
-     */
-    <T> T invoke(Invoker invoker, Invocation invocation) throws RpcException;
+
+    String key;
+
+    SideEnum(String key) {
+        this.key = key;
+    }
+
+
+    public static SideEnum acquire(String key) {
+        Optional<SideEnum> clusterEnum =
+                Arrays.stream(SideEnum.values())
+                        .filter(v -> Objects.equals(v.getKey(), key))
+                        .findFirst();
+        return clusterEnum.orElse(SideEnum.ALL);
+    }
+
+    public String getKey() {
+        return key;
+    }
 }
