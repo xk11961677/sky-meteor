@@ -27,6 +27,7 @@ import com.sky.meteor.cluster.loadbalance.LoadBalance;
 import com.sky.meteor.common.constant.CommonConstants;
 import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
+import com.sky.meteor.common.spi.SpiLoader;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
@@ -36,11 +37,16 @@ import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
 import com.sky.meteor.remoting.protocol.LongSequenceHelper;
 import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
+import com.sky.meteor.rpc.RpcContext;
+import com.sky.meteor.rpc.filter.Filter;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 import com.sky.meteor.rpc.future.InvokeFuture;
 import com.sky.meteor.serialization.ObjectSerializer;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -49,53 +55,99 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InvokerDispatcher implements Dispatcher {
 
+    private Invoker chain;
+
+    private ObjectSerializer serializer;
+
+    private LoadBalance loadBalance;
+
+    public InvokerDispatcher() {
+        ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
+        Invoker last = new Invoker() {
+            @Override
+            public <T> T invoke(Invocation invocation) throws RpcException {
+                return clusterInvoker.invoke(new InvokerWrapper(), invocation);
+            }
+        };
+        chain = build(last);
+
+        serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
+
+        loadBalance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
+    }
+
     @Override
     public Object dispatch(Invocation invocation, Class<?> returnType) {
-
-        Invoker invoker = new InvokerWrapper(invocation, returnType);
-        ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
-        Object result = clusterInvoker.invoke(invoker, invocation);
+        Object result;
+        try {
+            RpcContext.getContext().get().setReturnType(returnType);
+            Map<String, String> attachments = invocation.getAttachments();
+            for (Map.Entry<String, String> entry : attachments.entrySet()) {
+                RpcContext.getContext().get().setAttachment(entry.getKey(), entry.getValue());
+            }
+            result = chain.invoke(invocation);
+        } finally {
+            RpcContext.getContext().remove();
+        }
         return result;
     }
 
-    class InvokerWrapper implements Invoker {
-
-        Invocation invocation;
-
-        Class<?> returnType;
-
-        Request request;
-
-        long id;
-
-        InvokerWrapper(Invocation invocation, Class<?> returnType) {
-            this.invocation = invocation;
-            this.returnType = returnType;
-            this.id = LongSequenceHelper.getId();
+    /**
+     * 创建责任链
+     *
+     * @param last
+     * @return
+     */
+    private Invoker build(Invoker last) {
+        List<Filter> filters = SpiLoader.loadAllPriority(Filter.class);
+        Invoker next = last;
+        for (Filter filter : filters) {
+            next = getNode(filter, next);
         }
+        return next;
+    }
 
+    /**
+     * 获取节点
+     *
+     * @param filter
+     * @param next
+     * @return
+     */
+    private Invoker getNode(Filter filter, Invoker next) {
+        Invoker invoker = new Invoker() {
+            @Override
+            public <T> T invoke(Invocation invocation) throws RpcException {
+                return filter.invoke(next, invocation);
+            }
+        };
+        return invoker;
+    }
+
+    /**
+     * invoker尾节点,进行远程调用
+     */
+    private class InvokerWrapper implements Invoker {
 
         @Override
         public <T> T invoke(Invocation invocation) throws RpcException {
-            request = new Request(id);
-            ObjectSerializer serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
+            long id = LongSequenceHelper.getId();
+            Request request = new Request(id);
             byte[] serialize = serializer.serialize(invocation);
             request.bytes(serializer.getSchema(), serialize);
-            return (T) doInvoke();
+            return (T) doInvoke(id, request, invocation);
         }
 
-        private RegisterMeta.Address getAddress() {
+        private RegisterMeta.Address getAddress(Invocation invocation) {
             String group = invocation.getAttachment(CommonConstants.GROUP);
             String version = invocation.getAttachment(CommonConstants.VERSION, "1.0.0");
             String providerName = invocation.getAttachment(CommonConstants.PROVIDER_NAME, invocation.getClazzName());
-
             RegisterMeta.ServiceMeta serviceMeta = new RegisterMeta.ServiceMeta(group, providerName, version);
-            LoadBalance instance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
-            return instance.select(serviceMeta);
+            return loadBalance.select(serviceMeta);
         }
 
-        private InvokeFuture doInvoke() {
-            RegisterMeta.Address address = getAddress();
+        private InvokeFuture doInvoke(Long id, Request request, Invocation invocation) {
+            RegisterMeta.Address address = getAddress(invocation);
             long timeout = Long.parseLong(invocation.getAttachment(CommonConstants.TIMEOUT, "0"));
 
             //todo 对象池每次请求需要一个channel不太好, 性能待优化
@@ -105,7 +157,7 @@ public class InvokerDispatcher implements Dispatcher {
             try {
                 channel = channelGenericPool.getConnection();
                 try {
-                    invokeFuture = DefaultInvokeFuture.with(id, timeout, returnType);
+                    invokeFuture = DefaultInvokeFuture.with(id, timeout, RpcContext.getContext().get().getReturnType());
                     channel.writeAndFlush(request);
                 } catch (Exception e) {
                     log.error("the client invoke failed:{}", e);
