@@ -13,9 +13,17 @@
     <artifactId>meteor-filter</artifactId>
 
     <dependencies>
+
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>meteor-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>meteor-rpc-api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
 

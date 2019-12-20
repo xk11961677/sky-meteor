@@ -157,7 +157,6 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
         }
         ServerChannelHandler serverChannelHandler = new ServerChannelHandler(processor);
         MetricsChannelHandler metricsChannelHandler = new MetricsChannelHandler();
-        /*LoggingHandler loggingHandler = new LoggingHandler(LogLevel.INFO);*/
         try {
             bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
@@ -187,8 +186,7 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
 
     @Override
     public void connectToRegistryServer(Register register) {
-        SpiExtensionHolder.getInstance().loadSpiExtension(RegistryService.class, register.getName());
-        registryService = SpiExtensionHolder.getInstance().get(RegistryService.class);
+        registryService = SpiExtensionHolder.getInstance().loadSpiExtension(RegistryService.class, register.getName());
         registryService.connectToRegistryServer(register);
     }
 

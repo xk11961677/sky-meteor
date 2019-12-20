@@ -86,10 +86,16 @@ public class DefaultInvokeFuture<V> extends CompletableFuture<V> implements Invo
     private void doReceived(Response response) {
         byte status = response.getStatus();
         if (status == Status.OK.getKey()) {
-            byte[] bytes = response.getBytes();
-            byte serializerCode = response.getSerializerCode();
-            V v = SerializerHolder.getInstance().getSerializer(serializerCode).deSerialize(bytes, returnType);
-            complete(v);
+            try {
+                byte[] bytes = response.getBytes();
+                byte serializerCode = response.getSerializerCode();
+                V v = SerializerHolder.getInstance().getSerializer(serializerCode).deSerialize(bytes, returnType);
+                complete(v);
+            } catch (Exception e) {
+                log.error("the client deserialization failed :{}", e.getMessage());
+                setException(Status.DESERIALIZATION_FAIL.getKey());
+            }
+
         } else {
             setException(status);
         }

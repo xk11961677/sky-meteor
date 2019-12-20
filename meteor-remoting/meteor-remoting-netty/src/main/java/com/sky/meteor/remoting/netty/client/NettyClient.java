@@ -110,9 +110,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
 
     @Override
     public void init() {
-        /*LoggingHandler loggingHandler = new LoggingHandler(LogLevel.INFO);*/
         ClientChannelHandler clientChannelHandler = new ClientChannelHandler(processor);
-
         bootstrap = new Bootstrap();
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
@@ -121,12 +119,10 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
-//                        p.addLast("loggingHandler", loggingHandler);
                         p.addLast(new ClientIdleStateTrigger());
                         p.addLast(new HeartbeatChannelHandler());
                         p.addLast("protocolEncoder", new ProtocolEncoder());
                         p.addLast("protocolDecoder", new ProtocolDecoder());
-//                        p.addLast("loggingHandler", loggingHandler);
                         p.addLast("clientChannelHandler", clientChannelHandler);
                     }
                 });
@@ -134,8 +130,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
 
     @Override
     public void connectToRegistryServer(Register register) {
-        SpiExtensionHolder.getInstance().loadSpiExtension(RegistryService.class, register.getName());
-        registryService = SpiExtensionHolder.getInstance().get(RegistryService.class);
+        registryService = SpiExtensionHolder.getInstance().loadSpiExtension(RegistryService.class, register.getName());
         registryService.addNotifyListener(new PoolNotifyListener());
         registryService.connectToRegistryServer(register);
     }

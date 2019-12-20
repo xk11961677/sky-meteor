@@ -20,46 +20,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.netty.client.pool;
+package com.sky.meteor.filter;
 
-import com.sky.meteor.registry.meta.RegisterMeta;
-import lombok.Getter;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import com.sky.meteor.common.constant.CommonConstants;
+import com.sky.meteor.common.exception.RpcException;
+import com.sky.meteor.common.spi.SpiMetadata;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
+import com.sky.meteor.rpc.RpcContext;
+import com.sky.meteor.rpc.filter.Filter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author
  */
-public class ChannelGenericPoolFactory {
+@Slf4j
+@SpiMetadata(name = "traceFilter")
+public class TraceFilter implements Filter {
 
-    @Getter
-    private static ConcurrentHashMap<RegisterMeta.Address, ChannelGenericPool> pools = new ConcurrentHashMap<>();
 
-    private static final ReentrantLock LOCK = new ReentrantLock();
-
-    /**
-     * 创建channel对象池
-     *
-     * @param address
-     */
-    public static void create(RegisterMeta.Address address) {
-        LOCK.lock();
-        try {
-            ChannelGenericPool channelGenericPool = pools.get(address);
-            if (channelGenericPool == null) {
-                channelGenericPool = new ChannelGenericPool(address.getHost() + ":" + address.getPort());
-                pools.putIfAbsent(address, channelGenericPool);
-            }
-        } finally {
-            LOCK.unlock();
-        }
-    }
-
-    /**
-     * 销毁所有channel对象池
-     */
-    public static void destroy() {
-        pools.values().forEach(pool -> pool.close());
+    @Override
+    public <T> T invoke(Invoker invoker, Invocation invocation) throws RpcException {
+        RpcContext context = RpcContext.getContext().get().getAttachment() == null ? RpcContext.getServerContext().get() : RpcContext.getContext().get();
+        log.info("trace filter side :{}", context.getAttachment(CommonConstants.SIDE));
+        return invoker.invoke(invocation);
     }
 }

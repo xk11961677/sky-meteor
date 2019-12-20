@@ -28,7 +28,6 @@ import com.sky.meteor.common.constant.CommonConstants;
 import com.sky.meteor.common.enums.SideEnum;
 import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
-import com.sky.meteor.common.spi.SpiLoader;
 import com.sky.meteor.registry.meta.RegisterMeta;
 import com.sky.meteor.remoting.Request;
 import com.sky.meteor.remoting.Response;
@@ -39,7 +38,6 @@ import com.sky.meteor.remoting.protocol.LongSequenceHelper;
 import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
 import com.sky.meteor.rpc.RpcContext;
-import com.sky.meteor.rpc.filter.Filter;
 import com.sky.meteor.rpc.filter.FilterBuilder;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 import com.sky.meteor.rpc.future.InvokeFuture;
@@ -47,7 +45,6 @@ import com.sky.meteor.serialization.ObjectSerializer;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -118,30 +115,33 @@ public class InvokerDispatcher implements Dispatcher {
 
         private InvokeFuture doInvoke(Long id, Request request, Invocation invocation) {
             RegisterMeta.Address address = getAddress(invocation);
+            if (address == null) {
+                log.error("the client invoker address not found:{}");
+                response(id, Status.SERVICE_NOT_FOUND);
+                return null;
+            }
             long timeout = Long.parseLong(invocation.getAttachment(CommonConstants.TIMEOUT, "0"));
-
             //todo 对象池每次请求需要一个channel不太好, 性能待优化
             ChannelGenericPool channelGenericPool = ChannelGenericPoolFactory.getPools().get(address);
             InvokeFuture invokeFuture = null;
             Channel channel = null;
             try {
                 channel = channelGenericPool.getConnection();
-                try {
-                    invokeFuture = DefaultInvokeFuture.with(id, timeout, RpcContext.getContext().get().getReturnType());
-                    channel.writeAndFlush(request);
-                } catch (Exception e) {
-                    log.error("the client invoke failed:{}", e);
-                    Response response = new Response(id);
-                    response.setStatus(Status.CLIENT_ERROR.getKey());
-                    DefaultInvokeFuture.fakeReceived(response);
-                }
+                invokeFuture = DefaultInvokeFuture.with(id, timeout, RpcContext.getContext().get().getReturnType());
+                channel.writeAndFlush(request);
             } catch (Exception e) {
-                log.error("InvokerWrapper exception:{}", e);
-                throw new RpcException(Status.CLIENT_ERROR.getKey(), Status.CLIENT_ERROR.getValue(), e);
+                log.error("the client invoker failed:{}", e.getMessage());
+                response(id, Status.CLIENT_ERROR);
             } finally {
                 channelGenericPool.releaseConnection(channel);
             }
             return invokeFuture;
+        }
+
+        private void response(Long id, Status status) {
+            Response response = new Response(id);
+            response.setStatus(status.getKey());
+            DefaultInvokeFuture.fakeReceived(response);
         }
     }
 }

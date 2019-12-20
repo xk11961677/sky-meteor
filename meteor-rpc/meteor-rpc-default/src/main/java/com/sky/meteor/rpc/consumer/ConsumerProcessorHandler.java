@@ -28,12 +28,12 @@ import com.sky.meteor.remoting.Response;
 import com.sky.meteor.remoting.netty.AbstractProcessor;
 import com.sky.meteor.rpc.future.DefaultInvokeFuture;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * todo 修改线程池
- *
  * @author
  */
+@Slf4j
 public class ConsumerProcessorHandler extends AbstractProcessor {
 
     public ConsumerProcessorHandler() {
@@ -45,7 +45,11 @@ public class ConsumerProcessorHandler extends AbstractProcessor {
         ThreadPoolHelper.execute(new DefaultAsynchronousHandler() {
             @Override
             public Object call() throws Exception {
-                DefaultInvokeFuture.received(response);
+                try {
+                    DefaultInvokeFuture.received(response);
+                } catch (Exception e) {
+                    log.error("the client processor exception:{}", e.getMessage());
+                }
                 return null;
             }
         });

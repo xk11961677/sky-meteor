@@ -15,31 +15,32 @@
 
     <properties>
         <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
-        <springfox.version>2.9.2</springfox.version>
-        <swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
         <lombok.version>1.16.14</lombok.version>
-        <mybatis.version>3.4.2</mybatis.version>
-        <mybatis-starter-version>2.0.1</mybatis-starter-version>
-        <druid.version>1.1.16</druid.version>
-        <mysql.version>5.1.47</mysql.version>
-        <tk.mapper.version>4.1.5</tk.mapper.version>
-        <tk.mapper.starter.version>2.1.5</tk.mapper.starter.version>
-        <pagehelper.starter.version>1.2.10</pagehelper.starter.version>
         <fastjson.version>1.2.60</fastjson.version>
         <commons-codec.version>1.10</commons-codec.version>
         <commons-lang.verion>2.6</commons-lang.verion>
         <commons-lang3.version>3.5</commons-lang3.version>
         <commons-pool2.version>2.6.2</commons-pool2.version>
-        <jackson-databind.version>2.9.10.1</jackson-databind.version>
-        <hibernate-validator.version>6.0.16.Final</hibernate-validator.version>
-        <httpclient.version>4.5.2</httpclient.version>
-        <okhttp3.version>3.8.1</okhttp3.version>
-        <redisson.starter.version>3.11.0</redisson.starter.version>
         <kryo.version>2.24.0</kryo.version>
+        <kryo-shaded.version>4.0.0</kryo-shaded.version>
         <hutool.version>4.5.18</hutool.version>
-        <aliyun-sdk-oss.version>3.5.0</aliyun-sdk-oss.version>
-        <mybatis.plus.starter.version>3.2.0</mybatis.plus.starter.version>
+        <javassist.version>3.25.0-GA</javassist.version>
+        <bytebuddy.version>1.8.12</bytebuddy.version>
+        <netty.version>4.1.42.Final</netty.version>
+        <protostuff.version>1.0.8</protostuff.version>
+        <hessian.version>4.0.38</hessian.version>
+        <guava.version>27.0.1-jre</guava.version>
+        <curator.version>4.2.0</curator.version>
+        <reflectasm.version>1.11.0</reflectasm.version>
+
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
 
 
     <dependencyManagement>
@@ -61,86 +62,11 @@
                 <version>${fastjson.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.aliyun.oss</groupId>
-                <artifactId>aliyun-sdk-oss</artifactId>
-                <version>${aliyun-sdk-oss.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.squareup.okhttp3</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>${okhttp3.version}</version>
-            </dependency>
-
             <!--lombok-->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${springfox.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>swagger-bootstrap-ui</artifactId>
-                <version>${swagger-bootstrap-ui.version}</version>
-            </dependency>
-
-            <!--<dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
-            </dependency>-->
-
-            <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis-starter-version}</version>
-            </dependency>
-
-            <!--<dependency>
-                <groupId>tk.mybatis</groupId>
-                <artifactId>mapper</artifactId>
-                <version>${tk.mapper.version}</version>
-            </dependency>-->
-
-            <!--tk-mybatis mapper-->
-            <dependency>
-                <groupId>tk.mybatis</groupId>
-                <artifactId>mapper-spring-boot-starter</artifactId>
-                <version>${tk.mapper.starter.version}</version>
-            </dependency>
-
-            <!--pagehelper-->
-            <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper-spring-boot-starter</artifactId>
-                <version>${pagehelper.starter.version}</version>
-            </dependency>
-
-            <!--mybatis-plus mapper-->
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
-                <version>${mybatis.plus.starter.version}</version>
             </dependency>
 
             <dependency>
@@ -167,39 +93,78 @@
                 <version>${commons-pool2.version}</version>
             </dependency>
 
-            <!-- druid starter -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
-                <version>${druid.version}</version>
-            </dependency>
-
-            <!-- mysql connector -->
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.hibernate.validator</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate-validator.version}</version>
-            </dependency>
-
-            <!-- redisson starter -->
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson-spring-boot-starter</artifactId>
-                <version>${redisson.starter.version}</version>
-            </dependency>
-
-
-            <!-- kryo serializer -->
+            <!-- kryo serializer begin -->
             <dependency>
                 <groupId>com.esotericsoftware.kryo</groupId>
                 <artifactId>kryo</artifactId>
                 <version>${kryo.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo-shaded</artifactId>
+                <version>${kryo-shaded.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.dyuproject.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian.version}</version>
+            </dependency>
+
+            <!-- kryo serializer end -->
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>${javassist.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${bytebuddy.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>reflectasm</artifactId>
+                <version>${reflectasm.version}</version>
             </dependency>
 
             <!-- http://www.hutool.cn/ -->

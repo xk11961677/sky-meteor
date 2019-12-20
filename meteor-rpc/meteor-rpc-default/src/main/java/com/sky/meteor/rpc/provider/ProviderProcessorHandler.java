@@ -51,6 +51,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProviderProcessorHandler extends AbstractProcessor {
 
+    /**
+     * 服务端责任链
+     */
     private Invoker chain;
 
     public ProviderProcessorHandler() {
@@ -61,7 +64,6 @@ public class ProviderProcessorHandler extends AbstractProcessor {
     @Override
     public void handler(ChannelHandlerContext ctx, Request request) {
         ThreadPoolHelper.execute(new DefaultAsynchronousHandler() {
-
             @Override
             public Object call() throws Exception {
                 Response response = new Response(request.getId());
@@ -69,15 +71,10 @@ public class ProviderProcessorHandler extends AbstractProcessor {
                 response.setSerializerCode(request.getSerializerCode());
                 try {
                     RpcContext.getServerContext().get().setAttachment(CommonConstants.SIDE, SideEnum.PROVIDER.getKey());
-
                     ObjectSerializer serializer = SerializerHolder.getInstance().getSerializer(request.getSerializerCode());
-                    byte[] bytes = request.getBytes();
-                    RpcInvocation invocation = serializer.deSerialize(bytes, RpcInvocation.class);
-
+                    RpcInvocation invocation = serializer.deSerialize(request.getBytes(), RpcInvocation.class);
                     Object result = chain.invoke(invocation);
-
-                    byte[] body = serializer.serialize(result);
-                    response.setBytes(body);
+                    response.setBytes(serializer.serialize(result));
                 } catch (Exception e) {
                     response.setStatus(Status.SERVER_ERROR.getKey());
                     log.error("the server exception :{}", e);
@@ -95,6 +92,9 @@ public class ProviderProcessorHandler extends AbstractProcessor {
         });
     }
 
+    /**
+     * 服务端调用业务类
+     */
     private class ServerInvoker implements Invoker {
         @Override
         public <T> T invoke(Invocation invocation) throws RpcException {

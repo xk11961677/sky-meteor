@@ -21,3 +21,25 @@
  * THE SOFTWARE.
  */
 package com.sky.meteor.filter;
+
+import com.sky.meteor.common.enums.SideEnum;
+import com.sky.meteor.common.exception.RpcException;
+import com.sky.meteor.common.spi.SpiMetadata;
+import com.sky.meteor.rpc.Invocation;
+import com.sky.meteor.rpc.Invoker;
+import com.sky.meteor.rpc.filter.Filter;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * @author
+ */
+@Slf4j
+@SpiMetadata(name = "firstFilter", side = SideEnum.CONSUMER, priority = 10)
+public class FirstFilter implements Filter {
+
+    @Override
+    public <T> T invoke(Invoker invoker, Invocation invocation) throws RpcException {
+        log.info("first filter :{}");
+        return invoker.invoke(invocation);
+    }
+}
