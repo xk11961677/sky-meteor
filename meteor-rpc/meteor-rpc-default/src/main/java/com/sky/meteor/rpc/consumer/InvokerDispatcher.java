@@ -63,10 +63,11 @@ public class InvokerDispatcher implements Dispatcher {
 
     public InvokerDispatcher() {
         ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
+        InvokerWrapper invokerWrapper = new InvokerWrapper();
         Invoker last = new Invoker() {
             @Override
             public <T> T invoke(Invocation invocation) throws RpcException {
-                return clusterInvoker.invoke(new InvokerWrapper(), invocation);
+                return clusterInvoker.invoke(invokerWrapper, invocation);
             }
         };
         chain = build(last);
