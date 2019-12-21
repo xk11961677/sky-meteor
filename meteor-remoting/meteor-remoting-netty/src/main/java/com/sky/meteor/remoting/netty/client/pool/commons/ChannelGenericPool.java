@@ -20,13 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.netty.client.pool;
+package com.sky.meteor.remoting.netty.client.pool.commons;
 
 import com.sky.meteor.common.config.ConfigManager;
 import com.sky.meteor.remoting.netty.client.NettyClient;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool.impl.GenericObjectPool;
+
+import java.net.InetSocketAddress;
 
 /**
  * @author
@@ -36,7 +38,7 @@ public class ChannelGenericPool {
 
     private GenericObjectPool pool;
 
-    public ChannelGenericPool(String key) {
+    public ChannelGenericPool(InetSocketAddress address) {
         GenericObjectPool.Config config = new GenericObjectPool.Config();
         config.maxActive = ConfigManager.clientPoolMaxActive();
         config.maxWait = 3000;
@@ -45,15 +47,15 @@ public class ChannelGenericPool {
         config.testWhileIdle = true;
         config.numTestsPerEvictionRun = 1;
         config.timeBetweenEvictionRunsMillis = 10000;
-        pool = new GenericObjectPool(new BaseConnectionFactory(NettyClient.getInstance(), key), config);
+        pool = new GenericObjectPool(new BaseConnectionFactory(NettyClient.getInstance(), address), config);
 
     }
 
-    public Channel getConnection() throws Exception {
+    public Channel acquire() throws Exception {
         return (Channel) pool.borrowObject();
     }
 
-    public void releaseConnection(Channel channel) {
+    public void release(Channel channel) {
         try {
             pool.returnObject(channel);
         } catch (Exception e) {

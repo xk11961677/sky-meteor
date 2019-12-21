@@ -32,16 +32,20 @@ import com.sky.meteor.registry.RegistryService;
 import com.sky.meteor.remoting.AbstractBootstrap;
 import com.sky.meteor.remoting.netty.InternalHandler;
 import com.sky.meteor.remoting.netty.Processor;
-import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
-import com.sky.meteor.remoting.netty.protocol.ProtocolDecoder;
-import com.sky.meteor.remoting.netty.protocol.ProtocolEncoder;
+import com.sky.meteor.remoting.netty.client.pool.ChannelPoolFactory;
+import com.sky.meteor.remoting.netty.client.pool.commons.GenericChannelPoolFactory;
+import com.sky.meteor.remoting.netty.client.pool.fixed.FixedChannelPoolFactory;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
 
 /**
  * @author
@@ -70,6 +74,12 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
     @Getter
     private RegistryService registryService;
 
+    /**
+     *
+     */
+    @Getter
+    private ChannelPoolFactory channelPoolFactory;
+
 
     public NettyClient() {
         client = this;
@@ -87,7 +97,7 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
         if (status()) {
             super.shutdown();
             try {
-                ChannelGenericPoolFactory.destroy();
+                channelPoolFactory.close();
             } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }
@@ -111,27 +121,25 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
     @Override
     public void init() {
         ClientChannelHandler clientChannelHandler = new ClientChannelHandler(processor);
+        ChannelInitializerHandler channelInitializerHandler = new ChannelInitializerHandler(clientChannelHandler);
+
         bootstrap = new Bootstrap();
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, ConfigManager.tcpNodelay())
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline p = ch.pipeline();
-                        p.addLast(new ClientIdleStateTrigger());
-                        p.addLast(new HeartbeatChannelHandler());
-                        p.addLast("protocolEncoder", new ProtocolEncoder());
-                        p.addLast("protocolDecoder", new ProtocolDecoder());
-                        p.addLast("clientChannelHandler", clientChannelHandler);
-                    }
-                });
+                .handler(channelInitializerHandler);
+        /**
+         * 是否使用netty fixedChannelPool
+         */
+        channelPoolFactory = ConfigManager.nettyChannelPool() ? new FixedChannelPoolFactory(bootstrap, channelInitializerHandler) :
+                new GenericChannelPoolFactory();
+        channelPoolFactory.init();
     }
 
     @Override
     public void connectToRegistryServer(Register register) {
         registryService = SpiExtensionHolder.getInstance().loadSpiExtension(RegistryService.class, register.getName());
-        registryService.addNotifyListener(new PoolNotifyListener());
+        registryService.addNotifyListener(new RemotingNotifyListener());
         registryService.connectToRegistryServer(register);
     }
 
@@ -143,12 +151,17 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
     /**
      * 获取channel
      *
-     * @param key
      * @return
      */
-    public Channel getChannel(String key) {
-        String[] split = key.split(":");
-        return getChannel(split[0], Integer.parseInt(split[1]));
+    public Channel getChannel(InetSocketAddress address) {
+        try {
+            ChannelFuture f = bootstrap.connect(address).sync();
+            Channel channel = f.channel();
+            return channel;
+        } catch (Exception e) {
+            log.error("the remoting client get channel failed! :{}", e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -158,23 +171,5 @@ public class NettyClient extends AbstractBootstrap implements Registry, Internal
      */
     public static NettyClient getInstance() {
         return client;
-    }
-
-    /**
-     * 根据address port 获取channel
-     *
-     * @param address
-     * @param port
-     * @return
-     */
-    private Channel getChannel(String address, int port) {
-        try {
-            ChannelFuture f = bootstrap.connect(address, port).sync();
-            Channel channel = f.channel();
-            return channel;
-        } catch (Exception e) {
-            log.error("the remoting client get channel failed! :{}", e.getMessage());
-        }
-        return null;
     }
 }

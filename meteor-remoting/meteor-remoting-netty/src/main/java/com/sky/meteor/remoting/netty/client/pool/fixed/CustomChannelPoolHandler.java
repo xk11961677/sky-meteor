@@ -20,59 +20,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.netty.client.pool;
+package com.sky.meteor.remoting.netty.client.pool.fixed;
 
-import com.sky.meteor.remoting.netty.client.NettyClient;
+import com.sky.meteor.common.config.ConfigManager;
+import com.sky.meteor.remoting.netty.client.ChannelInitializerHandler;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.pool.ChannelPoolHandler;
+import io.netty.channel.socket.SocketChannel;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.pool.KeyedPoolableObjectFactory;
 
 /**
  * @author
  */
 @Slf4j
-public class KeyConnectionFactory implements KeyedPoolableObjectFactory<String, Channel> {
+public class CustomChannelPoolHandler implements ChannelPoolHandler {
 
-    private NettyClient client;
+    private ChannelInitializerHandler initializerHandler;
 
-    public KeyConnectionFactory(NettyClient client) {
-        this.client = client;
+    public CustomChannelPoolHandler(ChannelInitializerHandler initializerHandler) {
+        this.initializerHandler = initializerHandler;
     }
 
     @Override
-    public Channel makeObject(String key) throws Exception {
-        return client.getChannel(key);
+    public void channelReleased(Channel channel) throws Exception {
+        log.info("channelPoolChandler released :{}", channel.id());
     }
 
     @Override
-    public void destroyObject(String key, Channel channel) throws Exception {
-        channel.close().addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
-                log.info("KeyConnectionFactory close channel complete !");
-            }
-        });
+    public void channelAcquired(Channel channel) throws Exception {
+        log.info("channelPoolChandler acquired :{}", channel.id());
     }
 
     @Override
-    public boolean validateObject(String key, Channel channel) {
-        return channel.isActive();
-    }
-
-    @Override
-    public void activateObject(String key, Channel obj) throws Exception {
-    }
-
-    /**
-     * 挂起
-     *
-     * @param key
-     * @param obj
-     * @throws Exception
-     */
-    @Override
-    public void passivateObject(String key, Channel obj) throws Exception {
+    public void channelCreated(Channel channel) throws Exception {
+        log.info("channelPoolChandler created :{}", channel.id());
+        SocketChannel ch = (SocketChannel) channel;
+        ch.config().setTcpNoDelay(ConfigManager.tcpNodelay());
+        ch.pipeline().addLast(initializerHandler);
     }
 }

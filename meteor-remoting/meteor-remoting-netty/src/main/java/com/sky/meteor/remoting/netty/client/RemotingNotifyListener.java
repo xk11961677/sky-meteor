@@ -20,9 +20,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.netty.client.pool;
+package com.sky.meteor.remoting.netty.client;
 
-public class ChannelGenericKeyedPoolFactory {
+import com.sky.meteor.registry.NotifyListener;
+import com.sky.meteor.registry.meta.RegisterMeta;
+import lombok.extern.slf4j.Slf4j;
 
 
+/**
+ * @author
+ */
+@Slf4j
+public class RemotingNotifyListener implements NotifyListener {
+
+
+    @Override
+    public void notify(RegisterMeta registerMeta, NotifyEvent event) {
+        if (event == NotifyEvent.CHILD_ADDED) {
+            log.warn("pool notify listener child added {}", registerMeta);
+        }
+
+        if (event == NotifyEvent.CHILD_REMOVED) {
+            log.warn("pool notify listener child removed {}", registerMeta);
+        }
+    }
 }

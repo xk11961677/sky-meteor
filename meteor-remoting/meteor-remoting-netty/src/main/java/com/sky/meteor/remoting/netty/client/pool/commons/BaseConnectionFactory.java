@@ -20,30 +20,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.netty.client;
+package com.sky.meteor.remoting.netty.client.pool.commons;
 
-import com.sky.meteor.registry.NotifyListener;
-import com.sky.meteor.registry.meta.RegisterMeta;
-import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
+import com.sky.meteor.remoting.netty.client.NettyClient;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool.BasePoolableObjectFactory;
 
+import java.net.InetSocketAddress;
 
 /**
  * @author
  */
 @Slf4j
-public class PoolNotifyListener implements NotifyListener {
+public class BaseConnectionFactory extends BasePoolableObjectFactory<Channel> {
 
+    private NettyClient client;
+
+    private InetSocketAddress address;
+
+    public BaseConnectionFactory(NettyClient client, InetSocketAddress address) {
+        this.client = client;
+        this.address = address;
+    }
 
     @Override
-    public void notify(RegisterMeta registerMeta, NotifyEvent event) {
-        if (event == NotifyEvent.CHILD_ADDED) {
-            RegisterMeta.Address address = registerMeta.getAddress();
-            ChannelGenericPoolFactory.create(address);
-        }
+    public Channel makeObject() throws Exception {
+        return client.getChannel(address);
+    }
 
-        if (event == NotifyEvent.CHILD_REMOVED) {
-            log.warn("pool notify listener child removed {}", registerMeta);
-        }
+    @Override
+    public void destroyObject(Channel channel) throws Exception {
+        channel.close().addListener((ChannelFutureListener) channelFuture -> log.info("baseConnectionFactory close channel complete !"));
+    }
+
+    @Override
+    public boolean validateObject(Channel channel) {
+        return channel.isOpen() || channel.isActive() || channel.isWritable();
     }
 }

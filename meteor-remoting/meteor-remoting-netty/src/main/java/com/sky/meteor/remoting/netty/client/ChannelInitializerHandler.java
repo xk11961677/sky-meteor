@@ -20,46 +20,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.remoting.netty.client.pool;
+package com.sky.meteor.remoting.netty.client;
 
-import com.sky.meteor.registry.meta.RegisterMeta;
-import lombok.Getter;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import com.sky.meteor.remoting.netty.protocol.ProtocolDecoder;
+import com.sky.meteor.remoting.netty.protocol.ProtocolEncoder;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 
 /**
  * @author
  */
-public class ChannelGenericPoolFactory {
+public class ChannelInitializerHandler extends ChannelInitializer {
 
-    @Getter
-    private static ConcurrentHashMap<RegisterMeta.Address, ChannelGenericPool> pools = new ConcurrentHashMap<>();
+    private ClientChannelHandler clientChannelHandler;
 
-    private static final ReentrantLock LOCK = new ReentrantLock();
-
-    /**
-     * 创建channel对象池
-     *
-     * @param address
-     */
-    public static void create(RegisterMeta.Address address) {
-        LOCK.lock();
-        try {
-            ChannelGenericPool channelGenericPool = pools.get(address);
-            if (channelGenericPool == null) {
-                channelGenericPool = new ChannelGenericPool(address.getHost() + ":" + address.getPort());
-                pools.putIfAbsent(address, channelGenericPool);
-            }
-        } finally {
-            LOCK.unlock();
-        }
+    public ChannelInitializerHandler(ClientChannelHandler clientChannelHandler) {
+        this.clientChannelHandler = clientChannelHandler;
     }
 
-    /**
-     * 销毁所有channel对象池
-     */
-    public static void destroy() {
-        pools.values().forEach(pool -> pool.close());
+    @Override
+    protected void initChannel(Channel ch) throws Exception {
+        ChannelPipeline p = ch.pipeline();
+        p.addLast(new ClientIdleStateTrigger());
+        p.addLast(new HeartbeatChannelHandler());
+        p.addLast("protocolEncoder", new ProtocolEncoder());
+        p.addLast("protocolDecoder", new ProtocolDecoder());
+        p.addLast("clientChannelHandler", clientChannelHandler);
     }
 }

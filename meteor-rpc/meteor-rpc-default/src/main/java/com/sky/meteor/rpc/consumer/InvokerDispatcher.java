@@ -24,25 +24,18 @@ package com.sky.meteor.rpc.consumer;
 
 import com.sky.meteor.cluster.ClusterInvoker;
 import com.sky.meteor.cluster.loadbalance.LoadBalance;
+import com.sky.meteor.common.config.ConfigManager;
 import com.sky.meteor.common.constant.CommonConstants;
 import com.sky.meteor.common.enums.SideEnum;
 import com.sky.meteor.common.exception.RpcException;
 import com.sky.meteor.common.spi.SpiExtensionHolder;
-import com.sky.meteor.registry.meta.RegisterMeta;
-import com.sky.meteor.remoting.Request;
-import com.sky.meteor.remoting.Response;
-import com.sky.meteor.remoting.Status;
-import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPool;
-import com.sky.meteor.remoting.netty.client.pool.ChannelGenericPoolFactory;
-import com.sky.meteor.remoting.protocol.LongSequenceHelper;
 import com.sky.meteor.rpc.Invocation;
 import com.sky.meteor.rpc.Invoker;
 import com.sky.meteor.rpc.RpcContext;
+import com.sky.meteor.rpc.consumer.invoker.FixedClientInvoker;
+import com.sky.meteor.rpc.consumer.invoker.GenericClientInvoker;
 import com.sky.meteor.rpc.filter.FilterBuilder;
-import com.sky.meteor.rpc.future.DefaultInvokeFuture;
-import com.sky.meteor.rpc.future.InvokeFuture;
 import com.sky.meteor.serialization.ObjectSerializer;
-import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -62,7 +55,10 @@ public class InvokerDispatcher implements Dispatcher {
 
     public InvokerDispatcher() {
         ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
-        ClientInvoker invokerWrapper = new ClientInvoker();
+        serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
+        loadBalance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
+        Invoker invokerWrapper = ConfigManager.nettyChannelPool() ? new FixedClientInvoker(serializer, loadBalance) :
+                new GenericClientInvoker(serializer, loadBalance);
         Invoker last = new Invoker() {
             @Override
             public <T> T invoke(Invocation invocation) throws RpcException {
@@ -70,8 +66,6 @@ public class InvokerDispatcher implements Dispatcher {
             }
         };
         chain = FilterBuilder.build(last, SideEnum.CONSUMER);
-        serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
-        loadBalance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
     }
 
     @Override
@@ -89,59 +83,5 @@ public class InvokerDispatcher implements Dispatcher {
             RpcContext.getContext().remove();
         }
         return result;
-    }
-
-
-    /**
-     * invoker尾节点,进行远程调用
-     */
-    private class ClientInvoker implements Invoker {
-        @Override
-        public <T> T invoke(Invocation invocation) throws RpcException {
-            long id = LongSequenceHelper.getId();
-            Request request = new Request(id);
-            byte[] serialize = serializer.serialize(invocation);
-            request.bytes(serializer.getSchema(), serialize);
-            return (T) doInvoke(id, request, invocation);
-        }
-
-        private RegisterMeta.Address getAddress(Invocation invocation) {
-            String group = invocation.getAttachment(CommonConstants.GROUP);
-            String version = invocation.getAttachment(CommonConstants.VERSION, "1.0.0");
-            String providerName = invocation.getAttachment(CommonConstants.PROVIDER_NAME, invocation.getClazzName());
-            RegisterMeta.ServiceMeta serviceMeta = new RegisterMeta.ServiceMeta(group, providerName, version);
-            return loadBalance.select(serviceMeta);
-        }
-
-        private InvokeFuture doInvoke(Long id, Request request, Invocation invocation) {
-            RegisterMeta.Address address = getAddress(invocation);
-            if (address == null) {
-                log.error("the client invoker address not found:{}");
-                response(id, Status.SERVICE_NOT_FOUND);
-                return null;
-            }
-            long timeout = Long.parseLong(invocation.getAttachment(CommonConstants.TIMEOUT, "0"));
-            //todo 对象池每次请求需要一个channel不太好, 性能待优化
-            ChannelGenericPool channelGenericPool = ChannelGenericPoolFactory.getPools().get(address);
-            InvokeFuture invokeFuture = null;
-            Channel channel = null;
-            try {
-                channel = channelGenericPool.getConnection();
-                invokeFuture = DefaultInvokeFuture.with(id, timeout, RpcContext.getContext().get().getReturnType());
-                channel.writeAndFlush(request);
-            } catch (Exception e) {
-                log.error("the client invoker failed:{}", e.getMessage());
-                response(id, Status.CLIENT_ERROR);
-            } finally {
-                channelGenericPool.releaseConnection(channel);
-            }
-            return invokeFuture;
-        }
-
-        private void response(Long id, Status status) {
-            Response response = new Response(id);
-            response.setStatus(status.getKey());
-            DefaultInvokeFuture.fakeReceived(response);
-        }
     }
 }

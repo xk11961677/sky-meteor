@@ -20,28 +20,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.sky.meteor.rpc.filter;
+package com.sky.meteor.remoting.netty.client.pool.fixed;
 
-import com.sky.meteor.common.constant.CommonConstants;
-import com.sky.meteor.common.exception.RpcException;
-import com.sky.meteor.common.spi.SpiMetadata;
-import com.sky.meteor.rpc.Invocation;
-import com.sky.meteor.rpc.Invoker;
-import com.sky.meteor.rpc.RpcContext;
-import lombok.extern.slf4j.Slf4j;
+import com.sky.meteor.common.config.ConfigManager;
+import com.sky.meteor.remoting.netty.client.ChannelInitializerHandler;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.pool.FixedChannelPool;
 
 /**
  * @author
  */
-@Slf4j
-@SpiMetadata(name = "traceFilter")
-public class TraceFilter implements Filter {
+public class CustomFixedChannelPool extends FixedChannelPool {
 
-
-    @Override
-    public <T> T invoke(Invoker invoker, Invocation invocation) throws RpcException {
-        RpcContext context = RpcContext.getContext().get().getAttachment() == null ? RpcContext.getServerContext().get() : RpcContext.getContext().get();
-        log.info("trace filter side :{}", context.getAttachment(CommonConstants.SIDE));
-        return invoker.invoke(invocation);
+    public CustomFixedChannelPool(Bootstrap bootstrap, ChannelInitializerHandler initializerHandler) {
+        super(bootstrap, new CustomChannelPoolHandler(initializerHandler), ConfigManager.clientPoolMaxActive());
     }
 }

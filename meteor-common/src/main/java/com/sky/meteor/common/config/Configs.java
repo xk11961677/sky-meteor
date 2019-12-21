@@ -90,5 +90,10 @@ public class Configs {
 
     public static final String TP_DISCARD_SWITCH_DEFAULT = "true";
 
+    /**
+     * 是否使用netty默认fixedChannelPool
+     */
+    public static final String NETTY_CHANNEL_SWITCH = "netty.channel.pool";
 
+    public static final String NETTY_CHANNEL_SWITCH_DEFAULT = "true";
 }

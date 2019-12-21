@@ -27,6 +27,10 @@ package com.sky.meteor.common.config;
  */
 public class ConfigManager {
 
+    public static boolean nettyChannelPool() {
+        return getBool(Configs.NETTY_CHANNEL_SWITCH, Configs.NETTY_CHANNEL_SWITCH_DEFAULT);
+    }
+
     public static boolean tpDiscardSwitch() {
         return getBool(Configs.TP_DISCARD_SWITCH, Configs.TP_DISCARD_SWITCH_DEFAULT);
     }
