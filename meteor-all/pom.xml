@@ -14,7 +14,7 @@
     <description>meteor all ${project.version}</description>
     <url>https://github.com/xk11961677/sky-meteor</url>
 
-    <!--<dependencyManagement>
+    <dependencyManagement>
         <dependencies>
 
             <dependency>
@@ -25,9 +25,14 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>meteor-spring-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
         </dependencies>
-    </dependencyManagement>-->
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

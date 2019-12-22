@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.meteor-rpc.org/meteor"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            targetNamespace="http://www.meteor-rpc.org/meteor"
+            elementFormDefault="qualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans" />
+    <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
+    <xsd:complexType name="idType">
+        <xsd:attribute name="id" type="xsd:ID" use="required">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Bean unique ID. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:simpleType name="registryTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="default">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Meteor default registry service. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="zookeeper">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Zookeeper registry service. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="meteorServerPropertyType">
+        <xsd:attribute name="registryServerAddresses" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The registry server addresses(host1:port1,host2:port2....). ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="group" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The registry server metadata(meteor). ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <!--<xsd:attribute name="globalProviderInterceptors" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The global provider interceptors. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="globalFlowController" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The global flow controller. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>-->
+    </xsd:complexType>
+
+    <xsd:complexType name="meteorClientPropertyType">
+        <xsd:attribute name="registryServerAddresses" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The registry server addresses(host1:port1,host2:port2....). ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="group" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The registry server metadata(meteor). ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="serializerType" type="serializerTypeType" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The serializer type. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="loadBalancerType" type="loadBalancerTypeType" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The load balancer type. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:simpleType name="serializerTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="proto_stuff">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Protostuff. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="hessian">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Hessian. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="kryo">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Kryo. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="java">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Java. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="fastjson">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Fastjson. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="loadBalancerTypeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="round_robin">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Round robin. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="random">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Random. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="ext_spi">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Extension by spi. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="clusterStrategyType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="fail_fast">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Fail fast. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="fail_over">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Fail over. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+            <xsd:enumeration value="fail_safe">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[ Fail safe. ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <xsd:complexType name="optionType">
+        <xsd:attribute name="TCP_NODELAY" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Boolean ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="KEEP_ALIVE" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Boolean ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="SO_REUSEADDR" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Boolean ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="SO_SNDBUF" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Integer ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="SO_RCVBUF" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Integer ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="SO_LINGER" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Integer ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="SO_BACKLOG" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Integer ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="IP_TOS" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ Integer ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="meteorServerType">
+        <xsd:complexContent>
+            <xsd:extension base="idType">
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element name="property" type="meteorServerPropertyType"/>
+                    <xsd:element name="options" type="optionType"/>
+                </xsd:choice>
+                <xsd:attribute name="registryType" type="registryTypeType" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The registry service implementation type. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="port" type="xsd:int" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The server port. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="meteorClientType">
+        <xsd:complexContent>
+            <xsd:extension base="idType">
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element name="property" type="meteorClientPropertyType"/>
+                    <xsd:element name="options" type="optionType"/>
+                </xsd:choice>
+                <xsd:attribute name="appName" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The client app name. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="registryType" type="registryTypeType" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The registry service implementation type. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="consumerPropertyType">
+        <xsd:attribute name="version" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The provider version. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="extLoadBalancerName" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The ext load balancer name. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="timeoutMillis" type="xsd:long" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The invoke timeout millis. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="providerAddresses" type="xsd:string" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The providerAddresses. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="clusterStrategy" type="clusterStrategyType" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The cluster strategy type. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="failoverRetries" type="xsd:integer" use="optional">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[ The failover retries. ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="providerType">
+        <xsd:complexContent>
+            <xsd:extension base="idType">
+                <xsd:attribute name="server" type="xsd:string" use="required">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The meteor server. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="providerImpl" type="xsd:string" use="required">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The provider impl. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="group" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The group. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="name" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The name. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="consumerType">
+        <xsd:complexContent>
+            <xsd:extension base="idType">
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element name="property" type="consumerPropertyType"/>
+                </xsd:choice>
+                <xsd:attribute name="client" type="xsd:string" use="required">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The meteor client. ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="interfaceClass" type="xsd:string" use="required">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The interface class. ]]></xsd:documentation>
+                        <xsd:appinfo>
+                            <tool:annotation>
+                                <tool:expected-type type="java.lang.Class"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="group" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:documentation><![CDATA[ The registry server metadata(meteor). ]]></xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:element name="server" type="meteorServerType"/>
+    <xsd:element name="client" type="meteorClientType"/>
+    <xsd:element name="provider" type="providerType"/>
+    <xsd:element name="consumer" type="consumerType"/>
+</xsd:schema>

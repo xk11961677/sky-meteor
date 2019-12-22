@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:meteor="http://www.meteor-rpc.org/meteor"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.meteor-rpc.org/meteor http://www.meteor-rpc.org/meteor/meteor.xsd">
+
+    <meteor:server id="meteorServer" registryType="zookeeper" port="8090">
+        <meteor:property registryServerAddresses="127.0.0.1:2181" group="example"/>
+        <meteor:options SO_BACKLOG="1024"
+                        TCP_NODELAY="true"
+                        SO_REUSEADDR="true"/>
+    </meteor:server>
+
+    <meteor:client id="meteorClient" registryType="zookeeper" appName="example">
+        <meteor:property registryServerAddresses="127.0.0.1:2181" group="example"/>
+        <meteor:property loadBalancerType="round_robin"/>
+        <meteor:property serializerType="fastjson"/>
+        <meteor:options SO_BACKLOG="1024"
+                        TCP_NODELAY="true"
+                        SO_REUSEADDR="true"/>
+    </meteor:client>
+
+    <bean id="exampleApiImpl" class="com.sky.meteor.spring.ExampleApiImpl"></bean>
+
+    <meteor:provider id="exampleApiProvider" server="meteorServer"
+                     providerImpl="exampleApiImpl"
+                     name="com.sky.meteor.example.api.ExampleApi"
+                     group="example"/>
+
+    <meteor:consumer id="exampleApiConsumer" client="meteorClient"
+                     interfaceClass="com.sky.meteor.example.api.ExampleApi" group="example">
+        <meteor:property providerAddresses="127.0.0.1:8090"/>
+        <meteor:property version="1.0.0"/>
+        <meteor:property timeoutMillis="3000"/>
+        <meteor:property failoverRetries="3"/>
+    </meteor:consumer>
+
+</beans>

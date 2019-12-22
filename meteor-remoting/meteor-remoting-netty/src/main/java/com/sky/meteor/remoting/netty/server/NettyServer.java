@@ -82,6 +82,7 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
     /**
      * 端口号
      */
+    @Getter
     private int port;
     /**
      * 内部处理器
