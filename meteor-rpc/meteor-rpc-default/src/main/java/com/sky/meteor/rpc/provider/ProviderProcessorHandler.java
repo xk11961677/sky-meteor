@@ -85,6 +85,8 @@ public class ProviderProcessorHandler extends AbstractProcessor {
                         channel.writeAndFlush(response).addListener((ChannelFutureListener) channelFuture -> {
                             //log.info("the server response completed:{}");
                         });
+                    } else {
+                        log.error("the channel can't writeable , message dropped :{}");
                     }
                 }
                 return null;

@@ -177,7 +177,6 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
                         }
                     })
                     .childOption(ChannelOption.TCP_NODELAY, ConfigManager.tcpNodelay())
-                    .childOption(ChannelOption.SO_REUSEADDR, ConfigManager.tcpSoReuseaddr())
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         } catch (Exception e) {
             log.error("the remoting server init failed:{}", e.getMessage());

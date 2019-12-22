@@ -60,7 +60,6 @@
     </properties>
 
     <modules>
-        <module>meteor-dependencies</module>
         <module>meteor-bom</module>
         <module>meteor-all</module>
         <module>meteor-common</module>
@@ -72,6 +71,7 @@
         <module>meteor-filter</module>
         <module>meteor-config</module>
         <module>meteor-serialization</module>
+        <module>meteor-spring-support</module>
         <module>meteor-spring-boot-starter</module>
         <module>meteor-example</module>
     </modules>

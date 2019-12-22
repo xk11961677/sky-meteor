@@ -57,12 +57,12 @@ public class InvokerDispatcher implements Dispatcher {
         ClusterInvoker clusterInvoker = SpiExtensionHolder.getInstance().get(ClusterInvoker.class);
         serializer = SpiExtensionHolder.getInstance().get(ObjectSerializer.class);
         loadBalance = SpiExtensionHolder.getInstance().get(LoadBalance.class);
-        Invoker invokerWrapper = ConfigManager.nettyChannelPool() ? new FixedClientInvoker(serializer, loadBalance) :
+        Invoker clientInvoker = ConfigManager.nettyChannelPool() ? new FixedClientInvoker(serializer, loadBalance) :
                 new GenericClientInvoker(serializer, loadBalance);
         Invoker last = new Invoker() {
             @Override
             public <T> T invoke(Invocation invocation) throws RpcException {
-                return clusterInvoker.invoke(invokerWrapper, invocation);
+                return clusterInvoker.invoke(clientInvoker, invocation);
             }
         };
         chain = FilterBuilder.build(last, SideEnum.CONSUMER);
