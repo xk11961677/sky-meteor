@@ -150,11 +150,11 @@ public class NettyServer extends AbstractBootstrap implements Registry, Internal
     @Override
     public void init() {
         if (ConfigManager.nettyEpoll() && Epoll.isAvailable()) {
-            bossGroup = new EpollEventLoopGroup(0, new DefaultThreadFactory("netty_boss", true));
-            workerGroup = new EpollEventLoopGroup(0, new DefaultThreadFactory("netty_worker", true));
+            bossGroup = new EpollEventLoopGroup(0, new DefaultThreadFactory("netty_boss", false));
+            workerGroup = new EpollEventLoopGroup(0, new DefaultThreadFactory("netty_worker", false));
         } else {
-            bossGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("netty_boss", true));
-            workerGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("netty_worker", true));
+            bossGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("netty_boss", false));
+            workerGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("netty_worker", false));
         }
         ServerChannelHandler serverChannelHandler = new ServerChannelHandler(processor);
         MetricsChannelHandler metricsChannelHandler = new MetricsChannelHandler();
