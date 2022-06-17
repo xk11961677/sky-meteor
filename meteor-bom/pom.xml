@@ -16,7 +16,7 @@
     <properties>
         <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
         <lombok.version>1.16.14</lombok.version>
-        <fastjson.version>1.2.60</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <commons-codec.version>1.10</commons-codec.version>
         <commons-lang.verion>2.6</commons-lang.verion>
         <commons-lang3.version>3.5</commons-lang3.version>
